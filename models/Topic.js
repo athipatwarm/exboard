@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const topicSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true
+    required: true,
+    minlength: [3, 'Title must be at least 3 characters long']
   },
   description: String,
   category: {
@@ -40,7 +41,8 @@ const topicSchema = new mongoose.Schema({
       type: String,
       enum: ['pending', 'approved', 'rejected'],
       default: 'pending'
-    }
+    },
+    reason: String  // Add a reason for the update request
   }],
   deleteRequests: [{
     user: {
@@ -51,7 +53,8 @@ const topicSchema = new mongoose.Schema({
       type: String,
       enum: ['pending', 'approved', 'rejected'],
       default: 'pending'
-    }
+    },
+    reason: String  // Reason for deletion request
   }]
 });
 

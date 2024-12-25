@@ -1,18 +1,28 @@
 const Topic = require('../models/Topic');
 const User = require('../models/User');
 
-// Create a new topic
 exports.createTopic = async (req, res) => {
+  const { title, description, category } = req.body;
+
+  // Validate that necessary fields are present
+  if (!title || !description || !category) {
+    return res.status(400).send({ error: "Title, description, and category are required." });
+  }
+
   const topic = new Topic({
-    ...req.body,
+    title,
+    description,
+    category,
     author: req.user._id,
-    moderators: [req.user._id]
+    moderators: [req.user._id] // Automatically add the creator as a moderator
   });
+
   try {
     await topic.save();
     res.status(201).send(topic);
   } catch (error) {
-    res.status(400).send(error);
+    console.error("Error creating topic:", error);
+    res.status(400).send({ error: "Failed to create topic.", details: error.message });
   }
 };
 
