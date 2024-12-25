@@ -13,7 +13,7 @@ exports.createTopic = async (req, res) => {
     title,
     description,
     category,
-    author: req.user._id,  // The logged-in user becomes the author
+    author: req.user._id, // The logged-in user becomes the author
     moderators: [req.user._id],  // Automatically add the creator as a moderator
   });
 
@@ -25,7 +25,6 @@ exports.createTopic = async (req, res) => {
     res.status(400).send({ error: "Failed to create topic.", details: error.message });
   }
 };
-
 
 // Get all topics
 exports.getAllTopics = async (req, res) => {
