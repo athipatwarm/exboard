@@ -26,13 +26,12 @@ exports.getAllTopics = async (req, res) => {
   }
 };
 
-// Get a topic by ID
-exports.getTopicById = async (req, res) => {
-  const _id = req.params.id;
+exports.getTopicByName = async (req, res) => {
+  const topicName = req.params.topicName;
   try {
-    const topic = await Topic.findById(_id).populate('category').populate('author');
+    const topic = await Topic.findOne({ name: topicName }).populate('category').populate('author');
     if (!topic) {
-      return res.status(404).send();
+      return res.status(404).send({ error: 'Topic not found' });
     }
     res.status(200).send(topic);
   } catch (error) {

@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '../views/HomePage.vue';
 import TopicPage from '../views/TopicPage.vue';
+import TopicDetailPage from '../views/TopicDetailPage.vue';  
 import LoginPage from '../views/LoginPage.vue';
 import RegisterPage from '../views/RegisterPage.vue';
 import ProfilePage from '../views/ProfilePage.vue';
@@ -15,6 +16,12 @@ const routes = [
     path: '/topic',
     name: 'Topic',
     component: TopicPage,
+  },
+  {
+    path: '/topic/:topicName', // Dynamic route for topic detail page
+    name: 'TopicDetail',
+    component: TopicDetailPage,  // Component for showing the topic detail
+    props: true, // Allows passing params as props to the component
   },
   {
     path: '/login',
