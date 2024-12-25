@@ -43,7 +43,7 @@ const checkAuth = () => {
 const logout = async () => {
   try {
     // Send a request to the backend to invalidate the token
-    const response = await axios.post('http://localhost:3000/api/logout', {}, {
+    const response = await axios.post(`${import.meta.env.VITE_API_URL}/logout`, {}, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },

@@ -22,7 +22,9 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors());  // Enable Cross-Origin Resource Sharing (CORS)
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5713', // Allow localhost or your Heroku frontend URL
+}));
 app.use(express.json());  // To parse incoming JSON request bodies
 app.use(bodyParser.urlencoded({ extended: false })); // To parse URL-encoded bodies (optional, based on your needs)
 

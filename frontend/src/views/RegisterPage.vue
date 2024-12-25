@@ -42,7 +42,7 @@ const errorMessage = ref('');
 const registerUser = async () => {
   try {
     // Sending POST request to the backend to register a new user
-    const response = await axios.post('http://localhost:3000/api/register', {
+    const response = await axios.post(`${import.meta.env.VITE_API_URL}/register`, {
       username: username.value,
       email: email.value,
       password: password.value,
