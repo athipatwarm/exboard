@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema({
     token: {
       type: String,
       required: true
+    },
+    revoked: {
+      type: Boolean,
+      default: false
     }
   }],
   createdAt: {
@@ -36,6 +40,7 @@ const userSchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
 
 // Hash the password before saving the user
 userSchema.pre('save', async function (next) {

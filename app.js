@@ -11,6 +11,7 @@ const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const auth = require('./middleware/auth');
 const dotenv = require('dotenv');
+const { revokeAllTokens } = require('./utils/revokeTokens');
 
 // Load environment variables from .env file
 dotenv.config();
@@ -37,6 +38,12 @@ app.use('/api', categoryRoutes);
 app.use('/api', topicRoutes);
 app.use('/api', postRoutes);
 app.use('/api', commentRoutes);
+
+process.on('SIGTERM', async () => {
+  await revokeAllTokens();
+  console.log("Server shutting down, all tokens revoked.");
+  process.exit(0);  // Gracefully shutdown server
+});
 
 // Serve the frontend's index.html for any other route (useful for SPAs)
 app.get('*', (req, res) => {

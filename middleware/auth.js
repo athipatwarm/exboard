@@ -13,6 +13,10 @@ const auth = async (req, res, next) => {
     if (!user) {
       throw new Error();
     }
+    const tokenObject = user.tokens.find(t => t.token === token);
+    if (tokenObject.revoked) {
+      throw new Error('Token has been revoked');
+    }
 
     req.token = token;
     req.user = user;
