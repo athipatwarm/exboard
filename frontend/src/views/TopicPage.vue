@@ -2,8 +2,7 @@
   <div>
     <h1>Topic Page</h1>
     
-    <!-- Only show "Create Topic" button if the user is authenticated and an admin -->
-    <button v-if="isAuthenticated && isAdmin" @click="showCreateForm = !showCreateForm">
+    <button v-if="isAuthenticated && isAdmin" @click="toggleCreateForm">
       Create Topic
     </button>
 
@@ -49,6 +48,11 @@ const newTopic = ref({
   category: '',
 });
 
+const toggleCreateForm = () => {
+  console.log("Create Topic button clicked!");
+  showCreateForm.value = !showCreateForm.value;
+};
+
 const fetchTopics = async () => {
   try {
     const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics`);
@@ -61,11 +65,16 @@ const fetchTopics = async () => {
 const checkAuth = () => {
   const token = localStorage.getItem('token');
   if (token) {
-    isAuthenticated.value = true;
+    console.log('Token:', token);
     const decodedToken = JSON.parse(atob(token.split('.')[1]));
+    console.log('Decoded Token:', decodedToken);  // Check if 'role' exists here
+    isAuthenticated.value = true;
     isAdmin.value = decodedToken.role === 'admin';
   }
+  console.log('isAuthenticated:', isAuthenticated.value); // Debug
+  console.log('isAdmin:', isAdmin.value); // Debug
 };
+
 
 const createTopic = async () => {
   try {

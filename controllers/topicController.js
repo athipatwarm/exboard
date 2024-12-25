@@ -26,7 +26,6 @@ exports.createTopic = async (req, res) => {
   }
 };
 
-
 // Get all topics
 exports.getAllTopics = async (req, res) => {
   try {
