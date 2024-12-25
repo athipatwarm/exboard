@@ -20,11 +20,13 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: LoginPage,
+    meta: { requiresUnauth: true },  // Added meta to prevent access if already logged in
   },
   {
     path: '/register',
     name: 'Register',
     component: RegisterPage,
+    meta: { requiresUnauth: true },  // Added meta to prevent access if already logged in
   },
   {
     path: '/profile',
@@ -41,15 +43,24 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('token'); // Check if token exists
+
+  // Handle authenticated routes
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    // If route requires authentication and the user is not authenticated
     if (!isAuthenticated) {
-      next('/login'); // Redirect to login page
+      next('/login'); // Redirect to login page if not authenticated
     } else {
-      next(); // Allow navigation to the profile page
+      next(); // Proceed if authenticated
+    }
+  }
+  // Handle unauthenticated routes (Login/Register)
+  else if (to.matched.some(record => record.meta.requiresUnauth)) {
+    if (isAuthenticated) {
+      next('/profile'); // Redirect to profile if already authenticated
+    } else {
+      next(); // Proceed if not authenticated
     }
   } else {
-    next(); // Proceed if no authentication is required
+    next(); // Always allow navigation for routes that don't require auth
   }
 });
 
