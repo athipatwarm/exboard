@@ -13,8 +13,8 @@ const routes = [
     component: HomePage,
   },
   {
-    path: '/topic',
-    name: 'Topic',
+    path: '/topics',
+    name: 'Topics',
     component: TopicPage,
   },
   {
