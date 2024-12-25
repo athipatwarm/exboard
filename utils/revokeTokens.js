@@ -10,4 +10,14 @@ const revokeAllTokens = async () => {
   }
 };
 
+const revokeUserTokens = async (userId) => {
+    try {
+      // Clear all tokens for the given user (force logout from all devices)
+      await User.updateOne({ _id: userId }, { $set: { tokens: [] } });
+    } catch (error) {
+      console.error('Error revoking user tokens:', error);
+    }
+  };
+  
+
 module.exports = { revokeAllTokens };

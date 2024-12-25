@@ -53,13 +53,20 @@ userSchema.pre('save', async function (next) {
 // Generate JWT token
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
+  
+  // Remove old tokens, keeping only the current one
+  user.tokens = [];  // Clear any existing tokens
+  
+  // Generate a new token
   const token = jwt.sign({ _id: user._id.toString(), role: user.role }, process.env.JWT_KEY, { expiresIn: '8h' });
   
-  user.tokens = user.tokens.concat({ token });
+  // Save the new token to the database
+  user.tokens.push({ token });
   await user.save();
   
   return token;
 };
+
 
 // Check password
 userSchema.methods.checkPassword = async function (password) {

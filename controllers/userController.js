@@ -173,20 +173,28 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-// Logout a user
+// Logout a user from all devices (force logout from all other sessions)
 exports.logoutUser = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).send();
+      return res.status(404).send({ error: 'User not found' });
     }
 
-    user.tokens = user.tokens.filter(tokenObj => tokenObj.token !== req.token);
+    // Clear all tokens for the user (log them out of all devices)
+    user.tokens = [];
+
+    // Optionally, you can create a new token for the current session here if needed
+    const newToken = await user.generateAuthToken(); 
+    user.tokens.push({ token: newToken });
+
     await user.save();
 
-    res.status(200).send({ message: 'Successfully logged out' });
+    res.status(200).send({ message: 'Successfully logged out from all devices' });
   } catch (error) {
+    console.error('Logout failed:', error);
     res.status(500).send({ error: 'Logout failed' });
   }
 };
+
 
