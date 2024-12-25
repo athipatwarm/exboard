@@ -58,7 +58,7 @@ userSchema.methods.generateAuthToken = async function () {
   user.tokens = [];  // Clear any existing tokens
   
   // Generate a new token
-  const token = jwt.sign({ _id: user._id.toString(), role: user.role }, process.env.JWT_KEY, { expiresIn: '8h' });
+  const token = jwt.sign({ _id: user._id.toString(), role: user.role }, process.env.JWT_KEY, { expiresIn: '15m' });
   
   // Save the new token to the database
   user.tokens.push({ token });
