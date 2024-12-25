@@ -26,58 +26,61 @@
 </template>
 
 <script setup>
-import axios from 'axios';
-import { useRouter } from 'vue-router';
-import { ref, onMounted, onBeforeUnmount } from 'vue';  // onBeforeUnmount to safely remove the listener
-
-// Reactive variable to track authentication state
-const isAuthenticated = ref(false);
-
-// Function to check authentication status from localStorage
-const checkAuth = () => {
-  const token = localStorage.getItem('token');
-  isAuthenticated.value = !!token;  // Set to true if token exists, otherwise false
-};
-
-// Logout function to clear the token and update authentication state
-const logout = async () => {
-  try {
-    // Send a request to the backend to invalidate the token
-    const response = await axios.post(`${import.meta.env.VITE_API_URL}/logout`, {}, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-
-    if (response.status === 200) {
-      // If the logout is successful, clear the localStorage and update the auth state
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      isAuthenticated.value = false;
-
-      // Optionally redirect the user to the home or login page
-      router.push('/login');
+  import axios from 'axios';
+  import { useRouter } from 'vue-router';  // Import the useRouter hook
+  import { ref, onMounted, onBeforeUnmount } from 'vue';
+  
+  // Reactive variable to track authentication state
+  const isAuthenticated = ref(false);
+  
+  // Get router instance using useRouter hook
+  const router = useRouter(); // This will provide the router instance
+  
+  // Function to check authentication status from localStorage
+  const checkAuth = () => {
+    const token = localStorage.getItem('token');
+    isAuthenticated.value = !!token;  // Set to true if token exists, otherwise false
+  };
+  
+  // Logout function to clear the token and update authentication state
+  const logout = async () => {
+    try {
+      // Send a request to the backend to invalidate the token
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/logout`, {}, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+  
+      if (response.status === 200) {
+        // If the logout is successful, clear the localStorage and update the auth state
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        isAuthenticated.value = false;
+  
+        // Redirect the user to the login page
+        router.push('/login'); // Use the router instance to navigate
+      }
+    } catch (error) {
+      console.error('Logout failed', error);
     }
-  } catch (error) {
-    console.error('Logout failed', error);
-  }
-};
-
-
-// Listen for the custom event that signals a change in authentication status
-onMounted(() => {
-  // Check initial authentication state
-  checkAuth();
-
-  // Add event listener for 'auth-changed'
-  window.addEventListener('auth-changed', checkAuth);
-});
-
-// Remove the event listener safely before unmounting the component
-onBeforeUnmount(() => {
-  window.removeEventListener('auth-changed', checkAuth);
-});
-</script>
+  };
+  
+  // Listen for the custom event that signals a change in authentication status
+  onMounted(() => {
+    // Check initial authentication state
+    checkAuth();
+  
+    // Add event listener for 'auth-changed'
+    window.addEventListener('auth-changed', checkAuth);
+  });
+  
+  // Remove the event listener safely before unmounting the component
+  onBeforeUnmount(() => {
+    window.removeEventListener('auth-changed', checkAuth);
+  });
+  </script>
+  
 
 <style scoped>
 header {
