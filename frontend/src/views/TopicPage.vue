@@ -40,9 +40,9 @@ const checkAuth = () => {
 
 const createTopic = async () => {
   const topicData = {
-    name: 'New Topic Name',  // You can gather the topic details from a form
+    name: 'New Topic Name',  // Gather this dynamically via user input
     description: 'Description of the new topic',
-    // Add any other necessary data
+    category: 'category_id_here', // Replace with category ID
   };
 
   try {
@@ -56,14 +56,16 @@ const createTopic = async () => {
       }
     );
     console.log('Topic created successfully:', response.data);
-    // Redirect or update UI after creating the topic
+    fetchTopics();  // Reload topics list after creating a new topic
   } catch (error) {
     console.error('Error creating topic:', error);
   }
 };
 
+
 onMounted(() => {
   fetchTopics();
   checkAuth();
 });
+
 </script>
