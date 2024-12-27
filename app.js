@@ -1,5 +1,6 @@
 const path = require('path');
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -18,6 +19,8 @@ dotenv.config();
 
 // Initialize express app
 const app = express();
+
+app.use(cookieParser());
 
 // Connect to database
 connectDB();

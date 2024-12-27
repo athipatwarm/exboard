@@ -6,20 +6,27 @@ dotenv.config();
 
 const auth = async (req, res, next) => {
   try {
-    const token = req.header('Authorization').replace('Bearer ', '');
-    const decoded = jwt.verify(token, process.env.JWT_KEY);
+    const token = req.cookies.token; // Get the token from the cookie
+
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_KEY);  // Verify token
     const user = await User.findOne({ _id: decoded._id, 'tokens.token': token });
 
     if (!user) {
       throw new Error('Authentication failed');
     }
+
+    // Ensure the token hasn't been revoked
     const tokenObject = user.tokens.find(t => t.token === token);
     if (tokenObject.revoked) {
       throw new Error('Token has been revoked');
     }
 
-    req.token = token;
-    req.user = user;
+    req.token = token;  // Attach token to request object
+    req.user = user;    // Attach user object to request object
     next();
   } catch (error) {
     res.status(401).send({ error: 'Please authenticate.' });

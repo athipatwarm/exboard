@@ -84,8 +84,17 @@ exports.registerUser = async (req, res) => {
 
     const user = new User({ username, email, password });
     await user.save();
-    const token = user.generateAuthToken();
-    res.status(201).send({ user, token });
+    const token = await user.generateAuthToken();
+
+    // Set token in cookie
+    res.cookie('token', token, {
+      httpOnly: true,       // Helps prevent XSS attacks
+      secure: process.env.NODE_ENV === 'production', // Only set cookies over HTTPS in production
+      sameSite: 'Strict',   // Helps prevent CSRF attacks
+      maxAge: 15 * 60 * 1000  // Token expires in 15 minutes (same as the JWT expiration)
+    });
+
+    res.status(201).send({ user });
   } catch (error) {
     res.status(400).send(error);
   }
@@ -103,24 +112,18 @@ exports.loginUser = async (req, res) => {
       return res.status(400).send({ error: 'Invalid login credentials' });
     }
 
-    // Check if there is an existing valid token
-    let token;
-    const validToken = user.tokens.find(tokenObj => {
-      try {
-        jwt.verify(tokenObj.token, process.env.JWT_KEY);
-        return true;
-      } catch (error) {
-        return false;
-      }
+    // Generate a new token
+    const token = await user.generateAuthToken();
+
+    // Set token in cookie
+    res.cookie('token', token, {
+      httpOnly: true,       // Helps prevent XSS attacks
+      secure: process.env.NODE_ENV === 'production', // Only set cookies over HTTPS in production
+      sameSite: 'Strict',   // Helps prevent CSRF attacks
+      maxAge: 15 * 60 * 1000  // Token expires in 15 minutes (same as JWT expiration)
     });
 
-    if (validToken) {
-      token = validToken.token;
-    } else {
-      token = await user.generateAuthToken();
-    }
-
-    res.send({ user, token });
+    res.send({ user });
   } catch (error) {
     res.status(400).send(error);
   }
@@ -181,20 +184,18 @@ exports.logoutUser = async (req, res) => {
       return res.status(404).send({ error: 'User not found' });
     }
 
-    // Clear all tokens for the user (log them out of all devices)
-    user.tokens = [];
-
-    // Optionally, you can create a new token for the current session here if needed
-    const newToken = await user.generateAuthToken(); 
-    user.tokens.push({ token: newToken });
-
+    // Clear the user's token from the database (mark as revoked)
+    user.tokens = user.tokens.filter(t => t.token !== req.token);
     await user.save();
 
-    res.status(200).send({ message: 'Successfully logged out from all devices' });
+    // Clear the token cookie
+    res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+
+    res.status(200).send({ message: 'Logged out successfully' });
   } catch (error) {
-    console.error('Logout failed:', error);
     res.status(500).send({ error: 'Logout failed' });
   }
 };
+
 
 
