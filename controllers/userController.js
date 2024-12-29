@@ -52,19 +52,18 @@ exports.updateUser = async (req, res) => {
 };
 
 exports.deleteUser = async (req, res) => {
-  const _id = req.params.id || req.user._id; 
-  if (_id !== req.user._id.toString()) {
-    return res.status(403).send({ error: "You can only delete your own account." });
-  }
-
   try {
-    const user = await User.findByIdAndDelete(_id);
+    const userId = req.user._id;
+    
+    const user = await User.findByIdAndDelete(userId);
     if (!user) {
       return res.status(404).send({ error: "User not found" });
     }
+
     res.status(200).send({ message: "User account deleted successfully" });
   } catch (error) {
-    res.status(400).send({ error: "Error deleting user account" });
+    console.error("Error deleting user account:", error);
+    res.status(500).send({ error: "An error occurred while deleting the account" });
   }
 };
 

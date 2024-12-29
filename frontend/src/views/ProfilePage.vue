@@ -288,29 +288,31 @@ export default {
       showDeleteModal.value = false;
     };
 
-    // Delete the user account
     const deleteUser = async () => {
-    try {
-      const response = await fetch("/api/users/me", {
-        method: "DELETE",
-        credentials: "include", // Include cookies in the request
-      });
+      try {
+        const response = await fetch("/api/users/me", {
+          method: "DELETE",
+          credentials: "include", 
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-      if (!response.ok) {
-        throw new Error("Error deleting user account");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to delete user account");
+        }
+
+        successMessage.value = "Your account has been deleted.";
+        authStore.logout(); 
+        router.push("/login"); 
+      } catch (error) {
+        errorMessage.value = error.message || "Error deleting account.";
+        console.error(error);
+      } finally {
+        showDeleteModal.value = false;
       }
-
-      successMessage.value = "Your account has been deleted.";
-      authStore.logout(); // Log the user out after deleting the account
-      router.push("/login"); // Redirect to login page
-    } catch (error) {
-      errorMessage.value = error.message || "Error deleting account";
-      console.error(error);
-    } finally {
-      showDeleteModal.value = false;
-    }
-  };
-
+    };
 
     return {
       user,
