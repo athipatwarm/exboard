@@ -161,19 +161,26 @@ exports.updateProfile = async (req, res) => {
       return res.status(404).send({ error: 'User not found' });
     }
 
-    // If the password is being updated
+    // If the password is being updated, check if the current password is correct
     if (req.body.password) {
-      // Check if the current password matches
-      const isMatch = await bcrypt.compare(req.body.password, user.password);
+      // Assuming the 'password' in req.body is the new password, we will first need to verify the current password
+
+      const currentPassword = req.body.currentPassword; // Expecting the current password to be in the request body
+      if (!currentPassword) {
+        return res.status(400).send({ error: 'Current password is required' });
+      }
+
+      // Check if the current password matches the stored password
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
       if (!isMatch) {
         return res.status(400).send({ error: 'Current password is incorrect' });
       }
 
-      // Hash the new password before saving
+      // If current password is correct, hash the new password before saving
       user.password = await bcrypt.hash(req.body.password, 8); 
     }
 
-    // Apply allowed updates (username and email fields can also be updated)
+    // Apply allowed updates (username, email, or password)
     updates.forEach((update) => {
       if (update !== 'password') { // Avoid overwriting the password if it's being updated
         user[update] = req.body[update];
@@ -183,9 +190,11 @@ exports.updateProfile = async (req, res) => {
     await user.save();
     res.status(200).send(user);  // Send the updated user profile
   } catch (error) {
+    console.error(error);
     res.status(400).send({ error: 'Error updating profile' });
   }
 };
+
 
 // Logout a user from all devices (force logout from all other sessions)
 exports.logoutUser = async (req, res) => {
