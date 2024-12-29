@@ -72,18 +72,18 @@
         <button @click="updatePassword" class="submit-button">Update Password</button>
       </div>
 
+      <!-- Delete confirmation modal -->
+      <div v-if="showDeleteModal" class="delete-modal">
+        <div class="modal-content">
+          <p>Are you sure you want to delete your account?</p>
+          <button @click="deleteUser" class="confirm-button">Yes, Delete</button>
+          <button @click="cancelDelete" class="cancel-button">Cancel</button>
+        </div>
+      </div>
+
       <!-- Error or Success message -->
       <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
       <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
-    </div>
-
-    <!-- Delete confirmation modal -->
-    <div v-if="showDeleteModal" class="delete-modal">
-      <div class="modal-content">
-        <p>Are you sure you want to delete your account?</p>
-        <button @click="deleteUser" class="confirm-button">Yes, Delete</button>
-        <button @click="cancelDelete" class="cancel-button">Cancel</button>
-      </div>
     </div>
   </div>
 </template>
@@ -111,14 +111,12 @@ export default {
     const errorMessage = ref("");
     const successMessage = ref("");
     const loading = ref(true); // For loading state
+    const showDeleteModal = ref(false); // For delete confirmation modal visibility
 
     // Track which section is being edited
     const isEditingUsername = ref(false);
     const isEditingEmail = ref(false);
     const isEditingPassword = ref(false);
-
-    // Show modal for delete confirmation
-    const showDeleteModal = ref(false);
 
     // Ensure the user is authenticated before proceeding
     if (!authStore.isAuthenticated) {
@@ -262,36 +260,35 @@ export default {
       isEditingPassword.value = !isEditingPassword.value;
     };
 
-    // Handle delete user confirmation
+    // Show the delete confirmation modal
     const confirmDelete = () => {
       showDeleteModal.value = true;
     };
 
+    // Cancel delete action
     const cancelDelete = () => {
       showDeleteModal.value = false;
     };
 
+    // Delete the user account
     const deleteUser = async () => {
       try {
         const response = await fetch("/api/users/me", {
           method: "DELETE",
           credentials: "include", // Include cookies in the request
         });
-        const data = await response.json();
-
         if (!response.ok) {
-          throw new Error(data.error || "Failed to delete account.");
+          throw new Error("Error deleting user account");
         }
 
-        // Clear cookies and localStorage
-        document.cookie = "token=; max-age=0; path=/";
-        localStorage.removeItem("user");
-
-        // Redirect to login page
-        router.push("/login");
+        successMessage.value = "Your account has been deleted.";
+        authStore.logout(); // Log the user out after deleting the account
+        router.push("/login"); // Redirect to login page
       } catch (error) {
         errorMessage.value = error.message || "Error deleting account";
         console.error(error);
+      } finally {
+        showDeleteModal.value = false;
       }
     };
 
