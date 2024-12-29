@@ -1,71 +1,3 @@
-<template>
-  <div class="profile-container">
-    <h1>Profile Page</h1>
-
-    <!-- Display user data -->
-    <div class="profile-info">
-      <p><strong>Username:</strong> {{ user.username }}</p>
-      <p><strong>Email:</strong> {{ user.email }}</p>
-    </div>
-
-    <!-- Button to toggle profile edit form visibility -->
-    <button @click="toggleEditProfile" class="edit-button">Edit Profile</button>
-
-    <!-- Edit Profile Form -->
-    <div v-if="isEditing" class="profile-edit-form">
-      <!-- Edit Username -->
-      <div class="input-group">
-        <label for="username">Username</label>
-        <input
-          type="text"
-          id="username"
-          v-model="formData.username"
-          placeholder="Enter new username"
-        />
-      </div>
-
-      <!-- Edit Email -->
-      <div class="input-group">
-        <label for="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          v-model="formData.email"
-          placeholder="Enter new email"
-        />
-      </div>
-
-      <!-- Edit Password -->
-      <div class="input-group">
-        <label for="password">Current Password</label>
-        <input
-          type="password"
-          id="password"
-          v-model="formData.password"
-          placeholder="Enter current password"
-        />
-      </div>
-
-      <div class="input-group">
-        <label for="newPassword">New Password (Leave blank to keep current)</label>
-        <input
-          type="password"
-          id="newPassword"
-          v-model="formData.newPassword"
-          placeholder="Enter new password"
-        />
-      </div>
-
-      <!-- Update Button -->
-      <button @click="updateProfile" class="submit-button">Update Profile</button>
-
-      <!-- Error or Success message -->
-      <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-      <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
-    </div>
-  </div>
-</template>
-
 <script>
 import { ref, onMounted } from "vue";
 import { useAuthStore } from "../store/auth"; // assuming you have a store for authentication
@@ -86,14 +18,18 @@ export default {
     });
     const errorMessage = ref("");
     const successMessage = ref("");
-    const isEditing = ref(false);
+
+    // Track which section is being edited
+    const isEditingUsername = ref(false);
+    const isEditingEmail = ref(false);
+    const isEditingPassword = ref(false);
 
     // Fetch the user data on page load
     onMounted(async () => {
       try {
         const response = await fetch("/api/users/me", {
           method: "GET",
-          credentials: "include",  // Include cookies in the request
+          credentials: "include", // Include cookies in the request
         });
         const data = await response.json();
         if (!response.ok) {
@@ -106,19 +42,10 @@ export default {
       }
     });
 
-    const updateProfile = async () => {
+    // Methods to update profile sections
+    const updateUsername = async () => {
       errorMessage.value = "";
       successMessage.value = "";
-
-      const updatedData = { ...formData.value };
-
-      // Only send newPassword if it's provided
-      if (updatedData.newPassword) {
-        updatedData.password = updatedData.newPassword;  // Use newPassword as the current password for the backend
-        delete updatedData.newPassword; // Remove newPassword from the request body
-      } else {
-        delete updatedData.newPassword; // Remove it entirely if no new password
-      }
 
       try {
         const response = await fetch("/api/users/me", {
@@ -126,7 +53,7 @@ export default {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(updatedData),
+          body: JSON.stringify({ username: formData.value.username }),
           credentials: "include", // Include cookies in the request
         });
         const data = await response.json();
@@ -135,23 +62,83 @@ export default {
           throw new Error(data.error || "Something went wrong.");
         }
 
-        successMessage.value = "Profile updated successfully!";
-        // Update local data after success
-        user.value = { ...data };
-        formData.value.username = data.username;
-        formData.value.email = data.email;
-        formData.value.password = "";
-        formData.value.newPassword = "";
+        successMessage.value = "Username updated successfully!";
+        user.value.username = data.username;
+        formData.value.username = "";
       } catch (error) {
-        errorMessage.value = error.message || "Error updating profile";
+        errorMessage.value = error.message || "Error updating username";
         console.error(error);
       }
     };
 
+    const updateEmail = async () => {
+      errorMessage.value = "";
+      successMessage.value = "";
 
-    // Toggle edit form visibility
-    const toggleEditProfile = () => {
-      isEditing.value = !isEditing.value;
+      try {
+        const response = await fetch("/api/users/me", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: formData.value.email }),
+          credentials: "include", // Include cookies in the request
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Something went wrong.");
+        }
+
+        successMessage.value = "Email updated successfully!";
+        user.value.email = data.email;
+        formData.value.email = "";
+      } catch (error) {
+        errorMessage.value = error.message || "Error updating email";
+        console.error(error);
+      }
+    };
+
+    const updatePassword = async () => {
+      errorMessage.value = "";
+      successMessage.value = "";
+
+      try {
+        const response = await fetch("/api/users/me", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            password: formData.value.password,
+            newPassword: formData.value.newPassword,
+          }),
+          credentials: "include", // Include cookies in the request
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Something went wrong.");
+        }
+
+        successMessage.value = "Password updated successfully!";
+        formData.value.password = "";
+        formData.value.newPassword = "";
+      } catch (error) {
+        errorMessage.value = error.message || "Error updating password";
+        console.error(error);
+      }
+    };
+
+    // Toggle edit form visibility for username, email, and password
+    const toggleEditUsername = () => {
+      isEditingUsername.value = !isEditingUsername.value;
+    };
+    const toggleEditEmail = () => {
+      isEditingEmail.value = !isEditingEmail.value;
+    };
+    const toggleEditPassword = () => {
+      isEditingPassword.value = !isEditingPassword.value;
     };
 
     return {
@@ -159,9 +146,15 @@ export default {
       formData,
       errorMessage,
       successMessage,
-      isEditing,
-      updateProfile,
-      toggleEditProfile,
+      isEditingUsername,
+      isEditingEmail,
+      isEditingPassword,
+      updateUsername,
+      updateEmail,
+      updatePassword,
+      toggleEditUsername,
+      toggleEditEmail,
+      toggleEditPassword,
     };
   },
 };
@@ -195,14 +188,16 @@ h1 {
 }
 
 .edit-button {
-  margin: 20px 0;
-  padding: 10px 15px;
+  margin-top: 10px;
+  padding: 8px 15px;
   font-size: 1rem;
   border: 2px solid #f3a847;
   color: #f3a847;
   background-color: transparent;
   border-radius: 5px;
   cursor: pointer;
+  display: block;
+  width: 100%;
 }
 
 .edit-button:hover {
@@ -213,6 +208,7 @@ h1 {
 .profile-edit-form {
   display: flex;
   flex-direction: column;
+  margin-top: 20px;
 }
 
 .input-group {
@@ -229,6 +225,7 @@ h1 {
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 5px;
+  width: 100%;
 }
 
 .submit-button {
@@ -254,4 +251,5 @@ h1 {
   color: green;
   margin-top: 20px;
 }
+
 </style>
