@@ -1,16 +1,14 @@
 <script setup>
-import { defineComponent } from 'vue';  // You can import helpers if needed
-import Header from './components/Header.vue';  // Import Header component
+import Header from './components/Header.vue'; // Import Header component
 </script>
 
 <template>
   <div>
-    <!-- Your Global Header -->
-    <Header />  <!-- Header should appear here -->
+    <!-- Global Header Component -->
+    <Header />  
 
-    <!-- Router View will display the page content based on the route -->
-    <router-view />  <!-- This is where your route content will be injected -->
-
+    <!-- Router View displays the route content -->
+    <router-view /> 
   </div>
 </template>
 
@@ -21,9 +19,11 @@ import Header from './components/Header.vue';  // Import Header component
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.vue:hover {
   filter: drop-shadow(0 0 2em #42b883aa);
 }

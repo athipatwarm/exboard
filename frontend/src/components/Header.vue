@@ -23,16 +23,18 @@
 </template>
 
 <script setup>
-import { useAuthStore } from '../store/auth';
 import { onMounted } from 'vue';
+import { useAuthStore } from '../store/auth'; // Import auth store
 
 // Initialize the auth store
 const auth = useAuthStore();
 
+// Check authentication status on mounted
 onMounted(() => {
   auth.checkAuth();
 });
 
+// Logout handler
 const logout = () => {
   auth.logout();
 };
