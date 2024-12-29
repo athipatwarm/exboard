@@ -51,19 +51,23 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// Delete a user by ID (Admin only)
 exports.deleteUser = async (req, res) => {
-  const _id = req.params.id;
+  const _id = req.params.id || req.user._id; 
+  if (_id !== req.user._id.toString()) {
+    return res.status(403).send({ error: "You can only delete your own account." });
+  }
+
   try {
     const user = await User.findByIdAndDelete(_id);
     if (!user) {
-      return res.status(404).send();
+      return res.status(404).send({ error: "User not found" });
     }
-    res.status(200).send(user);
+    res.status(200).send({ message: "User account deleted successfully" });
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send({ error: "Error deleting user account" });
   }
 };
+
 
 exports.registerUser = async (req, res) => {
   try {

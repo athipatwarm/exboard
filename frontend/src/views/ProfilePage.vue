@@ -290,25 +290,27 @@ export default {
 
     // Delete the user account
     const deleteUser = async () => {
-      try {
-        const response = await fetch("/api/users/me", {
-          method: "DELETE",
-          credentials: "include", // Include cookies in the request
-        });
-        if (!response.ok) {
-          throw new Error("Error deleting user account");
-        }
+    try {
+      const response = await fetch("/api/users/me", {
+        method: "DELETE",
+        credentials: "include", // Include cookies in the request
+      });
 
-        successMessage.value = "Your account has been deleted.";
-        authStore.logout(); // Log the user out after deleting the account
-        router.push("/login"); // Redirect to login page
-      } catch (error) {
-        errorMessage.value = error.message || "Error deleting account";
-        console.error(error);
-      } finally {
-        showDeleteModal.value = false;
+      if (!response.ok) {
+        throw new Error("Error deleting user account");
       }
-    };
+
+      successMessage.value = "Your account has been deleted.";
+      authStore.logout(); // Log the user out after deleting the account
+      router.push("/login"); // Redirect to login page
+    } catch (error) {
+      errorMessage.value = error.message || "Error deleting account";
+      console.error(error);
+    } finally {
+      showDeleteModal.value = false;
+    }
+  };
+
 
     return {
       user,
