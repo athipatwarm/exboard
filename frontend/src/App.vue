@@ -1,5 +1,9 @@
 <script setup>
-import Header from './components/Header.vue'; // Import Header component
+import Header from './components/Header.vue'; 
+import { useAuthStore } from './store/auth'; 
+
+const auth = useAuthStore(); 
+console.log('Auth Status in App:', auth.isAuthenticated);
 </script>
 
 <template>

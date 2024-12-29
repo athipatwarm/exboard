@@ -1,7 +1,6 @@
 <template>
   <header>
     <nav>
-      <!-- Left Section for Home and Topic -->
       <div class="left">
         <ul>
           <li><button @click="navigateTo('/')">Home</button></li>
@@ -9,7 +8,6 @@
         </ul>
       </div>
 
-      <!-- Right Section for Login/Register or Logout/Profile -->
       <div class="right">
         <ul>
           <li v-if="!auth.isAuthenticated"><button @click="navigateTo('/login')">Login</button></li>
@@ -23,25 +21,28 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'; // Import useRouter hook
-import { useAuthStore } from '../store/auth'; // Import auth store
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../store/auth';
 
-// Initialize the auth store and router
 const auth = useAuthStore();
 const router = useRouter();
 
-// Immediately check authentication when the component is created
-auth.checkAuth();
+auth.checkAuth();  // Make sure to check authentication when the component is created
+
+// Log auth status to console
+console.log('Auth Status in Header:', auth.isAuthenticated);
 
 // Navigate to a specific route
 const navigateTo = (route) => {
-  router.push(route); // Use Vue Router to navigate programmatically
+  console.log(`Navigating to ${route}`); // Log navigation route
+  router.push(route);
 };
 
 // Logout handler
 const logout = () => {
   auth.logout();
-  router.push('/'); // Redirect to home after logout (or any other page)
+  console.log('User logged out');
+  router.push('/'); // Redirect to home after logout
 };
 </script>
 

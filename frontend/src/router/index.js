@@ -7,7 +7,6 @@ import LoginPage from '../views/LoginPage.vue';
 import RegisterPage from '../views/RegisterPage.vue';
 import ProfilePage from '../views/ProfilePage.vue';
 
-// Define the routes
 const routes = [
   {
     path: '/',
@@ -20,52 +19,53 @@ const routes = [
     component: TopicPage,
   },
   {
-    path: '/topic/:topicName', // Dynamic route for topic detail page
+    path: '/topic/:topicName',
     name: 'TopicDetail',
     component: TopicDetailPage,
-    props: true, // Allows passing params as props to the component
+    props: true,
   },
   {
     path: '/login',
     name: 'Login',
     component: LoginPage,
-    meta: { requiresUnauth: true },  // Prevents access if already logged in
+    meta: { requiresUnauth: true },
   },
   {
     path: '/register',
     name: 'Register',
     component: RegisterPage,
-    meta: { requiresUnauth: true },  // Prevents access if already logged in
+    meta: { requiresUnauth: true },
   },
   {
     path: '/profile',
     name: 'Profile',
     component: ProfilePage,
-    meta: { requiresAuth: true }, // Requires authentication to access this page
+    meta: { requiresAuth: true },
   },
 ];
 
-// Create the router instance
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 });
 
-// Global navigation guard for authentication
-router.beforeEach(async (to, from, next) => {
+// Global navigation guard for authentication check
+router.beforeEach((to, from, next) => {
   const auth = useAuthStore();  // Access the Pinia auth store
 
-  // Check if the route requires authentication
+  // Log authentication status
+  console.log('Before Each Route Navigation - Auth Status:', auth.isAuthenticated);
+
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!auth.isAuthenticated) {  // Check if the user is authenticated via the store
+    if (!auth.isAuthenticated) {
+      console.log('Not authenticated, redirecting to login');
       next('/login'); // Redirect to login if not authenticated
     } else {
       next(); // Proceed if authenticated
     }
-  }
-  // Handle unauthenticated routes (Login/Register)
-  else if (to.matched.some(record => record.meta.requiresUnauth)) {
+  } else if (to.matched.some(record => record.meta.requiresUnauth)) {
     if (auth.isAuthenticated) {
+      console.log('Already authenticated, redirecting to profile');
       next('/profile'); // Redirect to profile if already authenticated
     } else {
       next(); // Proceed if not authenticated

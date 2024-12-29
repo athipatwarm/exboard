@@ -3,84 +3,89 @@
     <h1>Profile Page</h1>
 
     <!-- Display user data -->
-    <div class="profile-info">
-      <p><strong>Username:</strong> {{ user.username }}</p>
-      <button v-if="!isEditingUsername" @click="toggleEditUsername" class="edit-button">Edit Username</button>
+    <div v-if="loading" class="loading-message">Loading...</div>
+    <div v-else>
+      <div class="profile-info">
+        <p><strong>Username:</strong> {{ user.username }}</p>
+        <button v-if="!isEditingUsername" @click="toggleEditUsername" class="edit-button">Edit Username</button>
 
-      <p><strong>Email:</strong> {{ user.email }}</p>
-      <button v-if="!isEditingEmail" @click="toggleEditEmail" class="edit-button">Edit Email</button>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <button v-if="!isEditingEmail" @click="toggleEditEmail" class="edit-button">Edit Email</button>
 
-      <!-- Password edit section -->
-      <button v-if="!isEditingPassword" @click="toggleEditPassword" class="edit-button">Change Password</button>
-    </div>
-
-    <!-- Edit Username Form -->
-    <div v-if="isEditingUsername" class="profile-edit-form">
-      <div class="input-group">
-        <label for="username">Username</label>
-        <input
-          type="text"
-          id="username"
-          v-model="formData.username"
-          placeholder="Enter new username"
-        />
-      </div>
-      <button @click="updateUsername" class="submit-button">Update Username</button>
-    </div>
-
-    <!-- Edit Email Form -->
-    <div v-if="isEditingEmail" class="profile-edit-form">
-      <div class="input-group">
-        <label for="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          v-model="formData.email"
-          placeholder="Enter new email"
-        />
-      </div>
-      <button @click="updateEmail" class="submit-button">Update Email</button>
-    </div>
-
-    <!-- Edit Password Form -->
-    <div v-if="isEditingPassword" class="profile-edit-form">
-      <div class="input-group">
-        <label for="password">Current Password</label>
-        <input
-          type="password"
-          id="password"
-          v-model="formData.password"
-          placeholder="Enter current password"
-        />
+        <!-- Password edit section -->
+        <button v-if="!isEditingPassword" @click="toggleEditPassword" class="edit-button">Change Password</button>
       </div>
 
-      <div class="input-group">
-        <label for="newPassword">New Password</label>
-        <input
-          type="password"
-          id="newPassword"
-          v-model="formData.newPassword"
-          placeholder="Enter new password"
-        />
+      <!-- Edit Username Form -->
+      <div v-if="isEditingUsername" class="profile-edit-form">
+        <div class="input-group">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            v-model="formData.username"
+            placeholder="Enter new username"
+          />
+        </div>
+        <button @click="updateUsername" class="submit-button">Update Username</button>
       </div>
 
-      <button @click="updatePassword" class="submit-button">Update Password</button>
-    </div>
+      <!-- Edit Email Form -->
+      <div v-if="isEditingEmail" class="profile-edit-form">
+        <div class="input-group">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            v-model="formData.email"
+            placeholder="Enter new email"
+          />
+        </div>
+        <button @click="updateEmail" class="submit-button">Update Email</button>
+      </div>
 
-    <!-- Error or Success message -->
-    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-    <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
+      <!-- Edit Password Form -->
+      <div v-if="isEditingPassword" class="profile-edit-form">
+        <div class="input-group">
+          <label for="password">Current Password</label>
+          <input
+            type="password"
+            id="password"
+            v-model="formData.password"
+            placeholder="Enter current password"
+          />
+        </div>
+
+        <div class="input-group">
+          <label for="newPassword">New Password</label>
+          <input
+            type="password"
+            id="newPassword"
+            v-model="formData.newPassword"
+            placeholder="Enter new password"
+          />
+        </div>
+
+        <button @click="updatePassword" class="submit-button">Update Password</button>
+      </div>
+
+      <!-- Error or Success message -->
+      <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+      <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
+    </div>
   </div>
 </template>
 
 <script>
 import { ref, onMounted } from "vue";
 import { useAuthStore } from "../store/auth"; // assuming you have a store for authentication
+import { useRouter } from "vue-router";
 
 export default {
   name: "ProfilePage",
   setup() {
     const authStore = useAuthStore();
+    const router = useRouter();
     const user = ref({
       username: "",
       email: "",
@@ -93,11 +98,17 @@ export default {
     });
     const errorMessage = ref("");
     const successMessage = ref("");
+    const loading = ref(true); // For loading state
 
     // Track which section is being edited
     const isEditingUsername = ref(false);
     const isEditingEmail = ref(false);
     const isEditingPassword = ref(false);
+
+    // Ensure the user is authenticated before proceeding
+    if (!authStore.isAuthenticated) {
+      router.push("/login"); // Redirect to login if not authenticated
+    }
 
     // Fetch the user data on page load
     onMounted(async () => {
@@ -114,6 +125,8 @@ export default {
       } catch (error) {
         errorMessage.value = error.message || "Failed to fetch user data";
         console.error("Error fetching user data", error);
+      } finally {
+        loading.value = false;
       }
     });
 
@@ -121,6 +134,11 @@ export default {
     const updateUsername = async () => {
       errorMessage.value = "";
       successMessage.value = "";
+
+      if (!formData.value.username) {
+        errorMessage.value = "Username is required.";
+        return;
+      }
 
       try {
         const response = await fetch("/api/users/me", {
@@ -151,6 +169,11 @@ export default {
       errorMessage.value = "";
       successMessage.value = "";
 
+      if (!formData.value.email) {
+        errorMessage.value = "Email is required.";
+        return;
+      }
+
       try {
         const response = await fetch("/api/users/me", {
           method: "PATCH",
@@ -179,6 +202,11 @@ export default {
     const updatePassword = async () => {
       errorMessage.value = "";
       successMessage.value = "";
+
+      if (!formData.value.password || !formData.value.newPassword) {
+        errorMessage.value = "Both current and new passwords are required.";
+        return;
+      }
 
       try {
         const response = await fetch("/api/users/me", {
@@ -224,6 +252,7 @@ export default {
       formData,
       errorMessage,
       successMessage,
+      loading,
       isEditingUsername,
       isEditingEmail,
       isEditingPassword,
@@ -328,5 +357,11 @@ h1 {
 .success-message {
   color: green;
   margin-top: 20px;
+}
+
+.loading-message {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #f3a847;
 }
 </style>
