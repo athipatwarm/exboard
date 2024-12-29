@@ -1,42 +1,34 @@
 <template>
-  <div>
-    <h1>Topic Page</h1>
+  <div class="topic-page">
+    <h1>Topics</h1>
 
-    <!-- Button to show Create Topic Form for Admin users -->
-    <button v-if="isAuthenticated && isAdmin" @click="toggleCreateForm">
+    <!-- Admin-only create topic button -->
+    <button v-if="isAuthenticated && isAdmin" @click="toggleCreateForm" class="create-button">
       Create Topic
     </button>
 
-    <!-- Form to create a new topic -->
-    <div v-if="showCreateForm">
+    <!-- Topic creation form -->
+    <div v-if="showCreateForm" class="create-form">
       <form @submit.prevent="createTopic">
-        <label for="title">Title:</label>
-        <input type="text" v-model="newTopic.title" required placeholder="Enter topic title" />
-
-        <label for="description">Description:</label>
-        <textarea v-model="newTopic.description" required placeholder="Enter topic description"></textarea>
-
-        <label for="category">Category:</label>
-        <input type="text" v-model="newTopic.category" required placeholder="Enter category ID" />
-
-        <!-- Confirm and Cancel buttons -->
-        <button type="submit" :disabled="isLoading">Confirm Create Topic</button>
-        <button type="button" @click="cancelCreateForm">Cancel</button>
+        <input type="text" v-model="newTopic.title" placeholder="Title" required class="input" />
+        <textarea v-model="newTopic.description" placeholder="Description" required class="input"></textarea>
+        <div class="form-actions">
+          <button type="submit" :disabled="isLoading" class="button submit-button">Create</button>
+          <button type="button" @click="cancelCreateForm" class="button cancel-button">Cancel</button>
+        </div>
       </form>
     </div>
 
-    <!-- Show list of topics -->
-    <ul>
+    <!-- List of topics -->
+    <ul v-if="topics.length" class="topic-list">
       <li v-for="topic in topics" :key="topic._id">
-        <router-link :to="`/topic/${topic.name}`">{{ topic.name }}</router-link>
+        <router-link :to="`/topic/${topic.name}`" class="topic-link">{{ topic.name }}</router-link>
       </li>
     </ul>
 
-    <!-- Loading indicator -->
+    <!-- Loading and message states -->
     <div v-if="isLoading" class="loading">Loading...</div>
-
-    <!-- Success/Error messages -->
-    <div v-if="message" :class="message.type">{{ message.text }}</div>
+    <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
   </div>
 </template>
 
@@ -45,7 +37,6 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
-// Reactive variables
 const topics = ref([]);
 const isAuthenticated = ref(false);
 const isAdmin = ref(false);
@@ -53,31 +44,26 @@ const showCreateForm = ref(false);
 const newTopic = ref({
   title: '',
   description: '',
-  category: '',
 });
-const isLoading = ref(false);  // Loading state for the create topic action
-const message = ref(null);  // To store success/error messages
+const isLoading = ref(false);
+const message = ref(null);
 
-// Toggle form visibility
 const toggleCreateForm = () => {
   showCreateForm.value = !showCreateForm.value;
 };
 
-// Fetch topics from the API
 const fetchTopics = async () => {
   try {
     isLoading.value = true;
     const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics`);
     topics.value = response.data;
   } catch (error) {
-    console.error('Error fetching topics:', error);
     message.value = { type: 'error', text: 'Failed to load topics.' };
   } finally {
     isLoading.value = false;
   }
 };
 
-// Check authentication and admin status
 const checkAuth = () => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -87,10 +73,9 @@ const checkAuth = () => {
   }
 };
 
-// Create a new topic
 const createTopic = async () => {
-  if (!newTopic.value.title || !newTopic.value.description || !newTopic.value.category) {
-    message.value = { type: 'error', text: 'All fields are required.' };
+  if (!newTopic.value.title || !newTopic.value.description) {
+    message.value = { type: 'error', text: 'Title and description are required.' };
     return;
   }
 
@@ -99,37 +84,31 @@ const createTopic = async () => {
     const topicData = {
       title: newTopic.value.title,
       description: newTopic.value.description,
-      category: newTopic.value.category,
     };
 
-    const response = await axios.post(
+    await axios.post(
       `${import.meta.env.VITE_API_URL}/topics`,
       topicData,
       {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       }
     );
 
     message.value = { type: 'success', text: 'Topic created successfully!' };
-    fetchTopics();  // Refresh the list of topics
-    resetCreateForm();  // Reset the form fields after successful creation
+    fetchTopics();
+    resetCreateForm();
   } catch (error) {
-    console.error('Error creating topic:', error);
     message.value = { type: 'error', text: 'Failed to create topic.' };
   } finally {
     isLoading.value = false;
   }
 };
 
-// Reset form fields
 const resetCreateForm = () => {
-  newTopic.value = { title: '', description: '', category: '' };
-  showCreateForm.value = false; // Hide form after submission
+  newTopic.value = { title: '', description: '' };
+  showCreateForm.value = false;
 };
 
-// Cancel the create topic form
 const cancelCreateForm = () => {
   resetCreateForm();
 };
@@ -141,44 +120,113 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Add basic styling for the page */
+.topic-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
 
-button {
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.create-button {
+  display: block;
+  margin: 20px auto;
   padding: 10px 20px;
-  margin: 10px 0;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
 }
 
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.create-button:hover {
+  background-color: #0056b3;
 }
 
-.loading {
-  font-size: 1.5em;
-  color: #555;
-  text-align: center;
+.create-form {
+  margin-top: 20px;
 }
 
-ul {
-  list-style: none;
-}
-
-li {
-  margin: 5px 0;
-}
-
-.message {
+.input {
+  width: 100%;
   padding: 10px;
-  margin-top: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
 }
 
-.success {
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.submit-button {
   background-color: #4caf50;
   color: white;
 }
 
-.error {
+.submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.cancel-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.cancel-button:hover {
+  background-color: #d32f2f;
+}
+
+.topic-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.topic-list li {
+  margin: 10px 0;
+}
+
+.topic-link {
+  text-decoration: none;
+  color: #007bff;
+}
+
+.topic-link:hover {
+  text-decoration: underline;
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.5em;
+  color: #777;
+}
+
+.message {
+  margin-top: 20px;
+  padding: 10px;
+  text-align: center;
+}
+
+.message.success {
+  background-color: #4caf50;
+  color: white;
+}
+
+.message.error {
   background-color: #f44336;
   color: white;
 }
