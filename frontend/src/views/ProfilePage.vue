@@ -15,8 +15,8 @@
         <!-- Password edit section -->
         <button v-if="!isEditingPassword" @click="toggleEditPassword" class="edit-button">Change Password</button>
 
-        <!-- Delete User Button -->
-        <button @click="confirmDeleteUser" class="delete-button">Delete User</button>
+        <!-- Delete user section -->
+        <button @click="confirmDelete" class="delete-button">Delete User</button>
       </div>
 
       <!-- Edit Username Form -->
@@ -77,10 +77,10 @@
       <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteConfirmation" class="confirmation-modal">
-      <div class="confirmation-content">
-        <h3>Are you sure you want to delete your account?</h3>
+    <!-- Delete confirmation modal -->
+    <div v-if="showDeleteModal" class="delete-modal">
+      <div class="modal-content">
+        <p>Are you sure you want to delete your account?</p>
         <button @click="deleteUser" class="confirm-button">Yes, Delete</button>
         <button @click="cancelDelete" class="cancel-button">Cancel</button>
       </div>
@@ -111,12 +111,14 @@ export default {
     const errorMessage = ref("");
     const successMessage = ref("");
     const loading = ref(true); // For loading state
-    const showDeleteConfirmation = ref(false); // Control delete confirmation visibility
 
     // Track which section is being edited
     const isEditingUsername = ref(false);
     const isEditingEmail = ref(false);
     const isEditingPassword = ref(false);
+
+    // Show modal for delete confirmation
+    const showDeleteModal = ref(false);
 
     // Ensure the user is authenticated before proceeding
     if (!authStore.isAuthenticated) {
@@ -260,32 +262,35 @@ export default {
       isEditingPassword.value = !isEditingPassword.value;
     };
 
-    // Show delete confirmation modal
-    const confirmDeleteUser = () => {
-      showDeleteConfirmation.value = true;
+    // Handle delete user confirmation
+    const confirmDelete = () => {
+      showDeleteModal.value = true;
     };
 
-    // Cancel delete action
     const cancelDelete = () => {
-      showDeleteConfirmation.value = false;
+      showDeleteModal.value = false;
     };
 
-    // Handle user deletion
     const deleteUser = async () => {
       try {
         const response = await fetch("/api/users/me", {
           method: "DELETE",
           credentials: "include", // Include cookies in the request
         });
+        const data = await response.json();
 
         if (!response.ok) {
-          throw new Error("Failed to delete user");
+          throw new Error(data.error || "Failed to delete account.");
         }
 
-        // Redirect after successful deletion
+        // Clear cookies and localStorage
+        document.cookie = "token=; max-age=0; path=/";
+        localStorage.removeItem("user");
+
+        // Redirect to login page
         router.push("/login");
       } catch (error) {
-        errorMessage.value = error.message || "Error deleting user";
+        errorMessage.value = error.message || "Error deleting account";
         console.error(error);
       }
     };
@@ -299,14 +304,14 @@ export default {
       isEditingUsername,
       isEditingEmail,
       isEditingPassword,
-      showDeleteConfirmation,
+      showDeleteModal,
       updateUsername,
       updateEmail,
       updatePassword,
       toggleEditUsername,
       toggleEditEmail,
       toggleEditPassword,
-      confirmDeleteUser,
+      confirmDelete,
       cancelDelete,
       deleteUser,
     };
@@ -315,9 +320,10 @@ export default {
 </script>
 
 <style scoped>
-/* Add the button style */
+/* Existing styles ... */
+
 .delete-button {
-  margin-top: 10px;
+  margin-top: 20px;
   padding: 8px 15px;
   font-size: 1rem;
   border: 2px solid red;
@@ -334,8 +340,7 @@ export default {
   color: white;
 }
 
-/* Modal Styles */
-.confirmation-modal {
+.delete-modal {
   position: fixed;
   top: 0;
   left: 0;
@@ -345,39 +350,30 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
 }
 
-.confirmation-content {
+.modal-content {
   background-color: white;
   padding: 20px;
   border-radius: 10px;
-  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .confirm-button {
+  padding: 10px 20px;
   background-color: red;
   color: white;
   border: none;
-  padding: 10px 20px;
-  font-size: 1rem;
+  border-radius: 5px;
   cursor: pointer;
-}
-
-.confirm-button:hover {
-  background-color: darkred;
 }
 
 .cancel-button {
-  background-color: #ccc;
-  color: black;
-  border: none;
   padding: 10px 20px;
-  font-size: 1rem;
+  background-color: #ccc;
+  color: white;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
-}
-
-.cancel-button:hover {
-  background-color: #999;
 }
 </style>
