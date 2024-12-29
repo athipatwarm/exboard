@@ -15,7 +15,7 @@
           <li v-if="!auth.isAuthenticated"><button @click="navigateTo('/login')">Login</button></li>
           <li v-if="!auth.isAuthenticated"><button @click="navigateTo('/register')">Register</button></li>
           <li v-if="auth.isAuthenticated"><button @click="navigateTo('/profile')">Profile</button></li>
-          <li v-if="auth.isAuthenticated"><button @click="logout">Logout</button></li>
+          <li v-if="auth.isAuthenticated"><button @click="logout" class="logout">Logout</button></li>
         </ul>
       </div>
     </nav>
@@ -48,13 +48,16 @@ const logout = () => {
 <style scoped>
 /* General header styling */
 header {
-  background-color: #f5f5f5; /* Light grey background for a fresh, airy feel */
+  background-color: #fff; /* Clean white background */
   color: #333; /* Darker text for contrast */
-  padding: 20px 40px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 nav {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -69,28 +72,25 @@ nav .left ul {
 }
 
 nav .left li {
-  margin: 0 25px;
+  margin: 0 15px;
 }
 
 nav button {
-  color: white; /* White text for the buttons */
-  font-size: 16px;
-  font-weight: 600; /* Bold font weight for emphasis */
-  text-decoration: none; /* Remove underline */
-  font-family: 'Arial', sans-serif; /* Custom font */
-  padding: 10px 20px; /* Space inside the button */
-  border-radius: 25px; /* Rounded corners for buttons */
-  background-color: #b0bec5; /* Darker grey than the navbar */
-  transition: all 0.3s ease; /* Smooth transitions */
-  display: inline-block; /* Ensure it's displayed as a block element */
-  cursor: pointer; /* Show pointer cursor on hover */
+  background: transparent;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 30px; /* Smooth rounded edges */
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 nav button:hover {
-  background-color: #90a4ae; /* Darker grey on hover */
+  background-color: #f0f0f0; /* Subtle hover effect */
 }
 
-/* Right section of the navbar */
 nav .right ul {
   list-style: none;
   display: flex;
@@ -99,38 +99,22 @@ nav .right ul {
 }
 
 nav .right li {
-  margin: 0 20px;
+  margin: 0 15px;
 }
 
-nav .right button {
-  background-color: #ff9800; /* Soft orange color for logout button */
+nav .logout {
+  background-color: #e57373; /* Red background for logout */
   color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 25px; /* Rounded corners for logout button */
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  padding: 8px 18px;
+  border-radius: 30px;
 }
 
-nav .right button:hover {
-  background-color: #e68900; /* Darker orange on hover */
-  transform: scale(1.05); /* Slightly enlarge the button on hover */
+nav .logout:hover {
+  background-color: #f44336; /* Darker red on hover */
 }
 
-/* Flexbox layout adjustments */
-nav .left {
-  flex: 1;
-}
-
-nav .right {
-  display: flex;
-  justify-content: flex-end;
-}
-
+/* Mobile responsiveness */
 @media (max-width: 768px) {
-  /* Mobile responsiveness */
   nav {
     flex-direction: column;
     align-items: flex-start;
