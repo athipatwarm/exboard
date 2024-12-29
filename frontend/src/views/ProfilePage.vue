@@ -8,8 +8,12 @@
       <p><strong>Email:</strong> {{ user.email }}</p>
     </div>
 
-    <!-- Form to update profile -->
-    <form @submit.prevent="updateProfile" class="profile-form">
+    <!-- Button to toggle profile edit form visibility -->
+    <button @click="toggleEditProfile" class="edit-button">Edit Profile</button>
+
+    <!-- Edit Profile Form -->
+    <div v-if="isEditing" class="profile-edit-form">
+      <!-- Edit Username -->
       <div class="input-group">
         <label for="username">Username</label>
         <input
@@ -20,6 +24,7 @@
         />
       </div>
 
+      <!-- Edit Email -->
       <div class="input-group">
         <label for="email">Email</label>
         <input
@@ -30,6 +35,7 @@
         />
       </div>
 
+      <!-- Edit Password -->
       <div class="input-group">
         <label for="password">Current Password</label>
         <input
@@ -50,12 +56,13 @@
         />
       </div>
 
-      <button type="submit" class="submit-button">Update Profile</button>
-    </form>
+      <!-- Update Button -->
+      <button @click="updateProfile" class="submit-button">Update Profile</button>
 
-    <!-- Error or Success message -->
-    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-    <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
+      <!-- Error or Success message -->
+      <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+      <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
+    </div>
   </div>
 </template>
 
@@ -79,6 +86,7 @@ export default {
     });
     const errorMessage = ref("");
     const successMessage = ref("");
+    const isEditing = ref(false);
 
     // Fetch the user data on page load
     onMounted(async () => {
@@ -134,12 +142,19 @@ export default {
       }
     };
 
+    // Toggle edit form visibility
+    const toggleEditProfile = () => {
+      isEditing.value = !isEditing.value;
+    };
+
     return {
       user,
       formData,
       errorMessage,
       successMessage,
+      isEditing,
       updateProfile,
+      toggleEditProfile,
     };
   },
 };
@@ -172,7 +187,23 @@ h1 {
   margin: 10px 0;
 }
 
-.profile-form {
+.edit-button {
+  margin: 20px 0;
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: 2px solid #f3a847;
+  color: #f3a847;
+  background-color: transparent;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.edit-button:hover {
+  background-color: #f3a847;
+  color: white;
+}
+
+.profile-edit-form {
   display: flex;
   flex-direction: column;
 }
