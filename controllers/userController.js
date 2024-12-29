@@ -145,29 +145,18 @@ exports.updateProfile = async (req, res) => {
       return res.status(404).send();
     }
 
+    if (req.body.password) {
+      // Check if the current password matches
+      const isMatch = await user.checkPassword(req.body.password);
+      if (!isMatch) {
+        return res.status(400).send({ error: 'Current password is incorrect' });
+      }
+      user.password = await bcrypt.hash(req.body.password, 8); // Hash the new password
+    }
+
     updates.forEach((update) => {
       user[update] = req.body[update];
     });
-
-    // Check for unique username and email
-    if (user.isModified('username')) {
-      const existingUser = await User.findOne({ username: user.username });
-      if (existingUser && existingUser._id.toString() !== user._id.toString()) {
-        return res.status(400).send({ error: 'Username already exists. Please choose another one.' });
-      }
-    }
-
-    if (user.isModified('email')) {
-      const existingEmail = await User.findOne({ email: user.email });
-      if (existingEmail && existingEmail._id.toString() !== user._id.toString()) {
-        return res.status(400).send({ error: 'Email already exists. Please choose another one.' });
-      }
-    }
-
-    // Hash the new password before saving
-    if (user.isModified('password')) {
-      user.password = await bcrypt.hash(user.password, 8);
-    }
 
     await user.save();
     res.send(user);
@@ -175,6 +164,7 @@ exports.updateProfile = async (req, res) => {
     res.status(400).send(error);
   }
 };
+
 
 // Logout a user from all devices (force logout from all other sessions)
 exports.logoutUser = async (req, res) => {
