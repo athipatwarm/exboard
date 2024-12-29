@@ -111,8 +111,14 @@ export default {
       successMessage.value = "";
 
       const updatedData = { ...formData.value };
-      // If password is empty, don't include it in the update request
-      if (!updatedData.newPassword) delete updatedData.newPassword;
+
+      // Only send newPassword if it's provided
+      if (updatedData.newPassword) {
+        updatedData.password = updatedData.newPassword;  // Use newPassword as the current password for the backend
+        delete updatedData.newPassword; // Remove newPassword from the request body
+      } else {
+        delete updatedData.newPassword; // Remove it entirely if no new password
+      }
 
       try {
         const response = await fetch("/api/users/me", {
@@ -121,7 +127,7 @@ export default {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(updatedData),
-          credentials: "include",  // Include cookies in the request
+          credentials: "include", // Include cookies in the request
         });
         const data = await response.json();
 
@@ -141,6 +147,7 @@ export default {
         console.error(error);
       }
     };
+
 
     // Toggle edit form visibility
     const toggleEditProfile = () => {

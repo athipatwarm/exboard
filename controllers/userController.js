@@ -140,7 +140,7 @@ exports.getUserProfile = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ['username', 'email', 'password'];
+  const allowedUpdates = ['username', 'email', 'password'];  // Only these fields are allowed for updates
   const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
 
   if (!isValidOperation) {
@@ -154,25 +154,30 @@ exports.updateProfile = async (req, res) => {
       return res.status(404).send({ error: 'User not found' });
     }
 
+    // If the password is being updated
     if (req.body.password) {
       // Check if the current password matches
       const isMatch = await bcrypt.compare(req.body.password, user.password);
       if (!isMatch) {
         return res.status(400).send({ error: 'Current password is incorrect' });
       }
-      user.password = await bcrypt.hash(req.body.password, 8); // Hash the new password
+
+      // Hash the new password before saving
+      user.password = await bcrypt.hash(req.body.password, 8); 
     }
 
+    // Apply allowed updates
     updates.forEach((update) => {
       user[update] = req.body[update];
     });
 
     await user.save();
-    res.status(200).send(user);
+    res.status(200).send(user);  // Send the updated user profile
   } catch (error) {
     res.status(400).send({ error: 'Error updating profile' });
   }
 };
+
 
 
 // Logout a user from all devices (force logout from all other sessions)
