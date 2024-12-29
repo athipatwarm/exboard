@@ -3,40 +3,43 @@ import axios from 'axios';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    isAuthenticated: false, // Default state
+    isAuthenticated: false, // Default authentication state
   }),
+
   actions: {
-    // Check if user is authenticated from localStorage or cookies
+    // Check if user is authenticated based on token
     checkAuth() {
-      const token = this.getCookie('token');  // Get the token from cookies (if any)
+      const token = this.getCookie('token');
       if (token) {
-        this.isAuthenticated = true;
+        this.isAuthenticated = true; // Token exists in cookies
       } else {
-        // Check if token is in localStorage
         const storedToken = localStorage.getItem('token');
         if (storedToken) {
           this.isAuthenticated = true;
-          this.setCookie('token', storedToken); // Set the cookie again if needed
+          this.setCookie('token', storedToken); // Sync cookie with localStorage
+        } else {
+          this.isAuthenticated = false; // No token found
         }
       }
     },
 
-    // Login user and set authentication token
+    // Log in the user and store the authentication token
     async login(email, password) {
       try {
         const response = await axios.post(`${import.meta.env.VITE_API_URL}/login`, { email, password });
         const token = response.data.token;
-        
-        // Store the token in localStorage and the cookie
-        localStorage.setItem('token', token); // Store token in localStorage
-        document.cookie = `token=${token}; path=/;`; // Store token in cookie
+
+        // Store the token in localStorage and set it as a cookie
+        localStorage.setItem('token', token);
+        this.setCookie('token', token);
         this.isAuthenticated = true;
       } catch (error) {
-        throw new Error('Login failed');
+        console.error('Login failed:', error);
+        throw new Error(error.response?.data?.message || 'Login failed. Please try again.');
       }
     },
 
-    // Logout user and clear authentication token
+    // Log out the user and clear the authentication state
     async logout() {
       try {
         await axios.post(`${import.meta.env.VITE_API_URL}/logout`, {}, {
@@ -44,30 +47,39 @@ export const useAuthStore = defineStore('auth', {
             Authorization: `Bearer ${this.getCookie('token')}`,
           },
         });
-        
-        // Remove token from localStorage and cookies
-        localStorage.removeItem('token'); // Remove token from localStorage
-        document.cookie = 'token=; Max-Age=0; path=/;';  // Remove token from cookies
-        this.isAuthenticated = false;  // Clear authenticated state
+
+        // Clear token from localStorage and cookies
+        localStorage.removeItem('token');
+        this.deleteCookie('token');
+        this.isAuthenticated = false;
       } catch (error) {
-        console.error('Logout failed', error);
+        console.error('Logout failed:', error);
+        // Fallback: Clear token even if the API call fails
+        localStorage.removeItem('token');
+        this.deleteCookie('token');
+        this.isAuthenticated = false;
       }
     },
 
-    // Utility function to get cookie by name
+    // Utility function to get a cookie by name
     getCookie(name) {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(';').shift();
-      return null;
+      const cookieString = document.cookie
+        .split('; ')
+        .find(row => row.startsWith(`${name}=`));
+      return cookieString ? cookieString.split('=')[1] : null;
     },
 
-    // Utility function to set cookie
+    // Utility function to set a cookie
     setCookie(name, value, days = 7) {
       const date = new Date();
-      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000)); // Expires in 'days' days
+      date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
       const expires = `expires=${date.toUTCString()}`;
-      document.cookie = `${name}=${value}; ${expires}; path=/`;
-    }
-  }
+      document.cookie = `${name}=${value}; ${expires}; path=/; Secure; SameSite=Strict`;
+    },
+
+    // Utility function to delete a cookie
+    deleteCookie(name) {
+      document.cookie = `${name}=; Max-Age=0; path=/; Secure; SameSite=Strict`;
+    },
+  },
 });

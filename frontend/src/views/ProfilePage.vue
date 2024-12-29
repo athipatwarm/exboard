@@ -289,40 +289,29 @@ export default {
     };
 
     const deleteUser = async () => {
-    try {
-      const response = await fetch("/api/users/me", {
-        method: "DELETE",
-        credentials: "include", 
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      try {
+        const response = await fetch("/api/users/me", {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to delete user account");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to delete user account");
+        }
+
+        console.log("Account deleted. Logging out...");
+        await authStore.logout(); // Call the centralized logout method
+      } catch (error) {
+        errorMessage.value = error.message || "Error deleting account.";
+        console.error(error);
+      } finally {
+        showDeleteModal.value = false;
       }
-
-      // Clear local storage
-      localStorage.clear();
-
-      // Clear cookies
-      document.cookie.split(";").forEach(cookie => {
-        const [name] = cookie.split("=");
-        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
-      });
-
-      successMessage.value = "Your account has been deleted.";
-      authStore.logout(); // Optional: If you have a Vuex or Pinia auth store
-      router.push("/login"); // Redirect to login
-    } catch (error) {
-      errorMessage.value = error.message || "Error deleting account.";
-      console.error(error);
-    } finally {
-      showDeleteModal.value = false;
-    }
-  };
-
+    };
 
     return {
       user,
