@@ -255,12 +255,35 @@ export default {
     // Toggle edit form visibility for username, email, and password
     const toggleEditUsername = () => {
       isEditingUsername.value = !isEditingUsername.value;
+      if (isEditingUsername.value) {
+        // Hide other edit forms
+        isEditingEmail.value = false;
+        isEditingPassword.value = false;
+        formData.value.email = '';  // Clear email input
+        formData.value.password = '';  // Clear password input
+        formData.value.newPassword = '';  // Clear new password input
+      }
     };
     const toggleEditEmail = () => {
       isEditingEmail.value = !isEditingEmail.value;
+      if (isEditingEmail.value) {
+        // Hide other edit forms
+        isEditingUsername.value = false;
+        isEditingPassword.value = false;
+        formData.value.username = '';  // Clear username input
+        formData.value.password = '';  // Clear password input
+        formData.value.newPassword = '';  // Clear new password input
+      }
     };
     const toggleEditPassword = () => {
       isEditingPassword.value = !isEditingPassword.value;
+      if (isEditingPassword.value) {
+        // Hide other edit forms
+        isEditingUsername.value = false;
+        isEditingEmail.value = false;
+        formData.value.username = '';  // Clear username input
+        formData.value.email = '';  // Clear email input
+      }
     };
 
     // Cancel editing (reset form and hide edit section)
@@ -337,6 +360,7 @@ export default {
   },
 };
 </script>
+
 
 
 <style scoped>

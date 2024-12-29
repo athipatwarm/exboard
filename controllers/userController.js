@@ -149,6 +149,11 @@ exports.updateProfile = async (req, res) => {
     return res.status(400).send({ error: 'Invalid updates!' });
   }
 
+  // Check if email contains '@' when updating the email
+  if (req.body.email && !req.body.email.includes('@')) {
+    return res.status(400).send({ error: 'Email must contain "@" symbol.' });
+  }
+
   try {
     // Ensure we are updating the currently authenticated user
     const user = await User.findById(req.user._id);
@@ -168,9 +173,11 @@ exports.updateProfile = async (req, res) => {
       user.password = await bcrypt.hash(req.body.password, 8); 
     }
 
-    // Apply allowed updates
+    // Apply allowed updates (username and email fields can also be updated)
     updates.forEach((update) => {
-      user[update] = req.body[update];
+      if (update !== 'password') { // Avoid overwriting the password if it's being updated
+        user[update] = req.body[update];
+      }
     });
 
     await user.save();
@@ -179,8 +186,6 @@ exports.updateProfile = async (req, res) => {
     res.status(400).send({ error: 'Error updating profile' });
   }
 };
-
-
 
 // Logout a user from all devices (force logout from all other sessions)
 exports.logoutUser = async (req, res) => {
