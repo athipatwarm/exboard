@@ -7,7 +7,7 @@ export const useAuthStore = defineStore('auth', {
   }),
   actions: {
     // Check if user is authenticated
-    async checkAuth() {
+    checkAuth() {
       const token = this.getCookie('token');  // Use 'token' cookie for authentication
       this.isAuthenticated = !!token;  // Update state based on token presence
     },

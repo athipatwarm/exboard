@@ -31,7 +31,7 @@ const auth = useAuthStore();
 
 // Check authentication status on mounted
 onMounted(() => {
-  auth.checkAuth();
+  auth.checkAuth();  // Check authentication on page reload or component mount
 });
 
 // Logout handler
