@@ -12,10 +12,10 @@
       <!-- Right Section for Login/Register or Logout/Profile -->
       <div class="right">
         <ul>
-          <li v-if="!isAuthenticated"><router-link to="/login">Login</router-link></li>
-          <li v-if="!isAuthenticated"><router-link to="/register">Register</router-link></li>
-          <li v-if="isAuthenticated"><router-link to="/profile">Profile</router-link></li>
-          <li v-if="isAuthenticated"><button @click="logout">Logout</button></li>
+          <li v-if="!auth.isAuthenticated"><router-link to="/login">Login</router-link></li>
+          <li v-if="!auth.isAuthenticated"><router-link to="/register">Register</router-link></li>
+          <li v-if="auth.isAuthenticated"><router-link to="/profile">Profile</router-link></li>
+          <li v-if="auth.isAuthenticated"><button @click="logout">Logout</button></li>
         </ul>
       </div>
     </nav>
@@ -23,70 +23,19 @@
 </template>
 
 <script setup>
-import axios from 'axios';
-import { useRouter } from 'vue-router';
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { useAuthStore } from '../store/auth';
+import { onMounted } from 'vue';
 
-// Reactive variable for authentication status
-const isAuthenticated = ref(false);
+// Initialize the auth store
+const auth = useAuthStore();
 
-// Utility function to get a cookie value by name
-const getCookie = (name) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-  return null;
-};
-
-// Check authentication status by reading the cookie
-const checkAuth = () => {
-  const token = getCookie('auth_token');
-  isAuthenticated.value = !!token; // Set to true if token exists
-};
-
-// Router instance
-const router = useRouter();
-
-// Logout function
-const logout = async () => {
-  try {
-    // Send logout request to the server
-    const response = await axios.post(`${import.meta.env.VITE_API_URL}/logout`, {}, {
-      headers: {
-        Authorization: `Bearer ${getCookie('auth_token')}`,
-      },
-    });
-
-    if (response.status === 200) {
-      // Clear the authentication cookie
-      document.cookie = 'auth_token=; Max-Age=0; path=/;';
-
-      // Update authentication state
-      isAuthenticated.value = false;
-
-      // Notify the app about the authentication state change
-      window.dispatchEvent(new Event('auth-changed'));
-
-      // Redirect to the login page
-      router.push('/login');
-    }
-  } catch (error) {
-    console.error('Logout failed', error);
-  }
-};
-
-// Listen for authentication state changes
 onMounted(() => {
-  checkAuth();
-
-  // Listen for the custom "auth-changed" event
-  window.addEventListener('auth-changed', checkAuth);
+  auth.checkAuth();
 });
 
-onBeforeUnmount(() => {
-  // Remove the event listener
-  window.removeEventListener('auth-changed', checkAuth);
-});
+const logout = () => {
+  auth.logout();
+};
 </script>
 
 <style scoped>

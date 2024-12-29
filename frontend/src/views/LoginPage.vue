@@ -24,40 +24,27 @@
 </template>
 
 <script setup>
-  import axios from 'axios';
-  import { ref } from 'vue';
-  import { useRouter } from 'vue-router';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/store/auth';
 
-  const email = ref('');
-  const password = ref('');
-  const errorMessage = ref('');
-  const router = useRouter();
+const auth = useAuthStore();
+const router = useRouter();
+const email = ref('');
+const password = ref('');
+const errorMessage = ref('');
 
-  const loginUser = async () => {
-    try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/login`, {
-        email: email.value,
-        password: password.value
-      });
-
-      // // Store the token and user info in localStorage
-      // localStorage.setItem('token', response.data.token);
-      // localStorage.setItem('user', JSON.stringify(response.data.user));
-
-      // Update the authentication state and redirect
-      // Use router to go to home page or dashboard
-      router.push('/');
-      
-      // Triggering a reactivity update for isAuthenticated in the header
-      window.dispatchEvent(new Event('auth-changed'));  // Trigger event
-
-    } catch (err) {
-      // Handle login failure
-      errorMessage.value = 'Invalid login credentials';
-      password.value = '';  // Clear the password input
-    }
-  };
+const loginUser = async () => {
+  try {
+    await auth.login(email.value, password.value);
+    router.push('/');
+  } catch (error) {
+    errorMessage.value = 'Invalid login credentials';
+    password.value = '';
+  }
+};
 </script>
+
 
 <style scoped>
     .login-page {
