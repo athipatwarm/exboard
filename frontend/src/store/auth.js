@@ -8,7 +8,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     // Check if user is authenticated
     async checkAuth() {
-      const token = this.getCookie('auth_token');  // You can also use localStorage or sessionStorage here if preferred
+      const token = this.getCookie('token');  // Use 'token' cookie for authentication
       this.isAuthenticated = !!token;  // Update state based on token presence
     },
 
@@ -16,7 +16,7 @@ export const useAuthStore = defineStore('auth', {
     async login(email, password) {
       try {
         const response = await axios.post(`${import.meta.env.VITE_API_URL}/login`, { email, password });
-        document.cookie = `auth_token=${response.data.token}; path=/;`;  // Set token in cookie
+        document.cookie = `token=${response.data.token}; path=/;`;  // Set JWT token in 'token' cookie
         this.isAuthenticated = true;  // Set authenticated state to true
       } catch (error) {
         throw new Error('Login failed');
@@ -28,10 +28,10 @@ export const useAuthStore = defineStore('auth', {
       try {
         await axios.post(`${import.meta.env.VITE_API_URL}/logout`, {}, {
           headers: {
-            Authorization: `Bearer ${this.getCookie('auth_token')}`,
+            Authorization: `Bearer ${this.getCookie('token')}`,
           },
         });
-        document.cookie = 'auth_token=; Max-Age=0; path=/;';
+        document.cookie = 'token=; Max-Age=0; path=/;';  // Remove 'token' cookie on logout
         this.isAuthenticated = false;  // Clear the authenticated state
       } catch (error) {
         console.error('Logout failed', error);
