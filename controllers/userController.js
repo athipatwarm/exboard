@@ -65,7 +65,6 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// Register a new user
 exports.registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -91,7 +90,7 @@ exports.registerUser = async (req, res) => {
       httpOnly: true,       // Helps prevent XSS attacks
       secure: process.env.NODE_ENV === 'production', // Only set cookies over HTTPS in production
       sameSite: 'Strict',   // Helps prevent CSRF attacks
-      maxAge: 15 * 60 * 1000  // Token expires in 15 minutes (same as the JWT expiration)
+      maxAge: 15 * 60 * 1000  // Token expires in 15 minutes
     });
 
     res.status(201).send({ user });
@@ -100,6 +99,7 @@ exports.registerUser = async (req, res) => {
   }
 };
 
+// Login user and set token in cookie
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -120,7 +120,7 @@ exports.loginUser = async (req, res) => {
       httpOnly: true,       // Helps prevent XSS attacks
       secure: process.env.NODE_ENV === 'production', // Only set cookies over HTTPS in production
       sameSite: 'Strict',   // Helps prevent CSRF attacks
-      maxAge: 15 * 60 * 1000  // Token expires in 15 minutes (same as JWT expiration)
+      maxAge: 15 * 60 * 1000  // Token expires in 15 minutes
     });
 
     res.send({ user });
