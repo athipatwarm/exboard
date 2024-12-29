@@ -92,55 +92,57 @@ export default {
     onMounted(async () => {
       try {
         const response = await fetch("/api/users/me", {
-          headers: {
-            Authorization: `Bearer ${authStore.token}`,
-          },
+          method: "GET",
+          credentials: "include",  // This ensures cookies are sent with the request
         });
-        const data = await response.json();
-        if (data) {
+
+        if (response.ok) {
+          const data = await response.json();
           user.value = data;
+        } else {
+          errorMessage.value = "Failed to fetch user data";
         }
       } catch (error) {
         console.error("Error fetching user data", error);
+        errorMessage.value = "Error fetching user data";
       }
     });
 
     const updateProfile = async () => {
-    errorMessage.value = "";
-    successMessage.value = "";
+      errorMessage.value = "";
+      successMessage.value = "";
 
-    const updatedData = { ...formData.value };
-    // If password is empty, don't include it in the update request
-    if (!updatedData.newPassword) delete updatedData.newPassword;
+      const updatedData = { ...formData.value };
+      // If password is empty, don't include it in the update request
+      if (!updatedData.newPassword) delete updatedData.newPassword;
 
-    try {
-      const response = await fetch("/api/users/me", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authStore.token}`,
-        },
-        body: JSON.stringify(updatedData),
-      });
-      const data = await response.json();
+      try {
+        const response = await fetch("/api/users/me", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",  // Include cookies in the request
+          body: JSON.stringify(updatedData),
+        });
+        const data = await response.json();
 
-      if (!response.ok) {
-        errorMessage.value = data.error || "Something went wrong.";
-    }  else {
-        successMessage.value = "Profile updated successfully!";
-        // Update local data after success
-        user.value = { ...data };
-        formData.value.username = data.username;
-        formData.value.email = data.email;
-        formData.value.password = "";
-        formData.value.newPassword = "";
+        if (!response.ok) {
+          errorMessage.value = data.error || "Something went wrong.";
+        } else {
+          successMessage.value = "Profile updated successfully!";
+          // Update local data after success
+          user.value = { ...data };
+          formData.value.username = data.username;
+          formData.value.email = data.email;
+          formData.value.password = "";
+          formData.value.newPassword = "";
+        }
+      } catch (error) {
+        errorMessage.value = "Error updating profile";
+        console.error(error);
       }
-    } catch (error) {
-      errorMessage.value = "Error updating profile";
-      console.error(error);
-    }
-  };
-
+    };
 
     // Toggle edit form visibility
     const toggleEditProfile = () => {
