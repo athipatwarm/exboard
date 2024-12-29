@@ -4,18 +4,18 @@
       <!-- Left Section for Home and Topic -->
       <div class="left">
         <ul>
-          <li><router-link to="/" class="nav-button">Home</router-link></li>
-          <li><router-link to="/topics" class="nav-button">Topics</router-link></li>
+          <li><button @click="navigateTo('/')">Home</button></li>
+          <li><button @click="navigateTo('/topics')">Topics</button></li>
         </ul>
       </div>
 
       <!-- Right Section for Login/Register or Logout/Profile -->
       <div class="right">
         <ul>
-          <li v-if="!auth.isAuthenticated"><router-link to="/login" class="nav-button">Login</router-link></li>
-          <li v-if="!auth.isAuthenticated"><router-link to="/register" class="nav-button">Register</router-link></li>
-          <li v-if="auth.isAuthenticated"><router-link to="/profile" class="nav-button">Profile</router-link></li>
-          <li v-if="auth.isAuthenticated"><button @click="logout" class="nav-button">Logout</button></li>
+          <li v-if="!auth.isAuthenticated"><button @click="navigateTo('/login')">Login</button></li>
+          <li v-if="!auth.isAuthenticated"><button @click="navigateTo('/register')">Register</button></li>
+          <li v-if="auth.isAuthenticated"><button @click="navigateTo('/profile')">Profile</button></li>
+          <li v-if="auth.isAuthenticated"><button @click="logout">Logout</button></li>
         </ul>
       </div>
     </nav>
@@ -23,24 +23,27 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'; // Import useRouter hook
 import { useAuthStore } from '../store/auth'; // Import auth store
 
-// Initialize the auth store
+// Initialize the auth store and router
 const auth = useAuthStore();
+const router = useRouter();
 
 // Immediately check authentication when the component is created
 auth.checkAuth();
 
+// Navigate to a specific route
+const navigateTo = (route) => {
+  router.push(route); // Use Vue Router to navigate programmatically
+};
+
 // Logout handler
 const logout = () => {
   auth.logout();
+  router.push('/'); // Redirect to home after logout (or any other page)
 };
 </script>
-
-<style scoped>
-/* ...styles remain the same... */
-</style>
-
 
 <style scoped>
 /* General header styling */
@@ -69,9 +72,8 @@ nav .left li {
   margin: 0 25px;
 }
 
-nav .left router-link,
-nav .right router-link {
-  color: white; /* White text for the links/buttons */
+nav button {
+  color: white; /* White text for the buttons */
   font-size: 16px;
   font-weight: 600; /* Bold font weight for emphasis */
   text-decoration: none; /* Remove underline */
@@ -84,8 +86,7 @@ nav .right router-link {
   cursor: pointer; /* Show pointer cursor on hover */
 }
 
-nav .left router-link:hover,
-nav .right router-link:hover {
+nav button:hover {
   background-color: #90a4ae; /* Darker grey on hover */
 }
 
