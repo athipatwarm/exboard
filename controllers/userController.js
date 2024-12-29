@@ -129,7 +129,15 @@ exports.loginUser = async (req, res) => {
   }
 };
 
-// Update user profile
+exports.getUserProfile = async (req, res) => {
+  try {
+    const user = req.user;  // `req.user` is populated by the `auth` middleware
+    res.status(200).send(user);
+  } catch (error) {
+    res.status(500).send({ error: 'Failed to fetch user data' });
+  }
+};
+
 exports.updateProfile = async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ['username', 'email', 'password'];
@@ -143,13 +151,12 @@ exports.updateProfile = async (req, res) => {
     // Ensure we are updating the currently authenticated user
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).send();
+      return res.status(404).send({ error: 'User not found' });
     }
 
-    // Only allow the user to update their own profile
     if (req.body.password) {
       // Check if the current password matches
-      const isMatch = await user.checkPassword(req.body.password);
+      const isMatch = await bcrypt.compare(req.body.password, user.password);
       if (!isMatch) {
         return res.status(400).send({ error: 'Current password is incorrect' });
       }
@@ -161,9 +168,9 @@ exports.updateProfile = async (req, res) => {
     });
 
     await user.save();
-    res.send(user);
+    res.status(200).send(user);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send({ error: 'Error updating profile' });
   }
 };
 

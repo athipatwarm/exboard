@@ -93,18 +93,16 @@ export default {
       try {
         const response = await fetch("/api/users/me", {
           method: "GET",
-          credentials: "include",  // This ensures cookies are sent with the request
+          credentials: "include",  // Include cookies in the request
         });
-
-        if (response.ok) {
-          const data = await response.json();
-          user.value = data;
-        } else {
-          errorMessage.value = "Failed to fetch user data";
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to fetch user data");
         }
+        user.value = data;
       } catch (error) {
+        errorMessage.value = error.message || "Failed to fetch user data";
         console.error("Error fetching user data", error);
-        errorMessage.value = "Error fetching user data";
       }
     });
 
@@ -122,24 +120,24 @@ export default {
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include",  // Include cookies in the request
           body: JSON.stringify(updatedData),
+          credentials: "include",  // Include cookies in the request
         });
         const data = await response.json();
 
         if (!response.ok) {
-          errorMessage.value = data.error || "Something went wrong.";
-        } else {
-          successMessage.value = "Profile updated successfully!";
-          // Update local data after success
-          user.value = { ...data };
-          formData.value.username = data.username;
-          formData.value.email = data.email;
-          formData.value.password = "";
-          formData.value.newPassword = "";
+          throw new Error(data.error || "Something went wrong.");
         }
+
+        successMessage.value = "Profile updated successfully!";
+        // Update local data after success
+        user.value = { ...data };
+        formData.value.username = data.username;
+        formData.value.email = data.email;
+        formData.value.password = "";
+        formData.value.newPassword = "";
       } catch (error) {
-        errorMessage.value = "Error updating profile";
+        errorMessage.value = error.message || "Error updating profile";
         console.error(error);
       }
     };
