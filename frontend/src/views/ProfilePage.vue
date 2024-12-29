@@ -15,8 +15,8 @@
         <!-- Password edit section -->
         <button v-if="!isEditingPassword" @click="toggleEditPassword" class="edit-button">Change Password</button>
 
-        <!-- Delete user section -->
-        <button @click="confirmDelete" class="delete-button">Delete User</button>
+        <!-- Ensure delete button is visible -->
+        <button v-if="!isEditingUsername && !isEditingEmail && !isEditingPassword" @click="confirmDelete" class="delete-button">Delete User</button>
       </div>
 
       <!-- Edit Username Form -->
@@ -317,8 +317,7 @@ export default {
 </script>
 
 <style scoped>
-/* Existing styles ... */
-
+/* Add styles for delete button */
 .delete-button {
   margin-top: 20px;
   padding: 8px 15px;
