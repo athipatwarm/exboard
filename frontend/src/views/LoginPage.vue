@@ -39,10 +39,10 @@
         email: email.value,
         password: password.value
       });
-      
-      // Store the token and user info in localStorage
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+
+      // // Store the token and user info in localStorage
+      // localStorage.setItem('token', response.data.token);
+      // localStorage.setItem('user', JSON.stringify(response.data.user));
 
       // Update the authentication state and redirect
       // Use router to go to home page or dashboard
