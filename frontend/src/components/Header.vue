@@ -38,6 +38,11 @@ const logout = () => {
 </script>
 
 <style scoped>
+/* ...styles remain the same... */
+</style>
+
+
+<style scoped>
 /* General header styling */
 header {
   background-color: #f5f5f5; /* Light grey background for a fresh, airy feel */
