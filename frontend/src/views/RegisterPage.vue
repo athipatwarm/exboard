@@ -30,7 +30,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import axios from 'axios';  // You can use axios to make HTTP requests
+import axios from 'axios';
 
 // Declare form fields and error message
 const username = ref('');
@@ -50,9 +50,9 @@ const registerUser = async () => {
 
     // If registration is successful, reset form fields and show a success message
     console.log('User registered successfully:', response.data);
-    
+
     // Show success alert
-    alert('Registration successful!');
+    alert('Registration successful! Please log in.');
 
     // Clear input fields
     username.value = '';
@@ -60,7 +60,7 @@ const registerUser = async () => {
     password.value = '';
 
     // Optionally, redirect to login page
-    // You can use: this.$router.push('/login'); if using Vue Router
+    // Example: router.push('/login'); if using Vue Router
   } catch (error) {
     // If there was an error (e.g., username/email already exists), show the error message
     errorMessage.value = error.response?.data?.error || 'Registration failed. Please try again.';
