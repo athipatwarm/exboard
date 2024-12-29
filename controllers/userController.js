@@ -54,7 +54,7 @@ exports.updateUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     const userId = req.user._id;
-    
+
     const user = await User.findByIdAndDelete(userId);
     if (!user) {
       return res.status(404).send({ error: "User not found" });
@@ -72,33 +72,32 @@ exports.registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Check if the username already exists
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
+    // Check if the username or email already exists
+    if (await User.findOne({ username })) {
       return res.status(400).send({ error: 'Username already exists. Please choose another one.' });
     }
-
-    // Check if the email already exists
-    const existingEmail = await User.findOne({ email });
-    if (existingEmail) {
+    if (await User.findOne({ email })) {
       return res.status(400).send({ error: 'Email already exists. Please choose another one.' });
     }
 
-    const user = new User({ username, email, password });
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create a new user without generating a token
+    const user = new User({ username, email, password: hashedPassword });
     await user.save();
-    const token = await user.generateAuthToken();
 
-    // Set token in cookie
-    res.cookie('token', token, {
-      httpOnly: true,       // Helps prevent XSS attacks
-      secure: process.env.NODE_ENV === 'production', // Only set cookies over HTTPS in production
-      sameSite: 'Strict',   // Helps prevent CSRF attacks
-      maxAge: 15 * 60 * 1000  // Token expires in 15 minutes
+    // Return user details (excluding sensitive info like password)
+    res.status(201).send({
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+      },
     });
-
-    res.status(201).send({ user });
   } catch (error) {
-    res.status(400).send(error);
+    console.error('Error during registration:', error);
+    res.status(500).send({ error: 'Internal Server Error' });
   }
 };
 

@@ -22,7 +22,6 @@
         <button type="submit">Register</button>
       </div>
       
-      <!-- Display error message -->
       <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
     </form>
   </div>
@@ -32,37 +31,26 @@
 import { ref } from 'vue';
 import axios from 'axios';
 
-// Declare form fields and error message
+// Form state
 const username = ref('');
 const email = ref('');
 const password = ref('');
 const errorMessage = ref('');
 
-// Register user function
 const registerUser = async () => {
   try {
-    // Sending POST request to the backend to register a new user
     const response = await axios.post(`${import.meta.env.VITE_API_URL}/register`, {
       username: username.value,
       email: email.value,
       password: password.value,
     });
 
-    // If registration is successful, reset form fields and show a success message
-    console.log('User registered successfully:', response.data);
-
-    // Show success alert
     alert('Registration successful! Please log in.');
-
-    // Clear input fields
     username.value = '';
     email.value = '';
     password.value = '';
-
-    // Optionally, redirect to login page
-    // Example: router.push('/login'); if using Vue Router
+    // Optionally redirect to login page here.
   } catch (error) {
-    // If there was an error (e.g., username/email already exists), show the error message
     errorMessage.value = error.response?.data?.error || 'Registration failed. Please try again.';
   }
 };
