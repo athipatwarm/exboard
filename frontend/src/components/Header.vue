@@ -43,10 +43,10 @@ const logout = () => {
 <style scoped>
 /* General header styling */
 header {
-  background-color: #1f1f1f; /* Dark background for a modern look */
-  color: #fff; /* White text for contrast */
-  padding: 15px 30px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+  background-color: #f5f5f5; /* Light grey background for a fresh, airy feel */
+  color: #333; /* Darker text for contrast */
+  padding: 20px 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
 }
 
 nav {
@@ -64,19 +64,20 @@ nav .left ul {
 }
 
 nav .left li {
-  margin: 0 20px;
+  margin: 0 25px;
+  position: relative;
 }
 
 nav .left router-link {
-  color: #ffffff;
+  color: #333;
   font-size: 16px;
   font-weight: 500;
-  text-decoration: none;
+  text-decoration: none; /* Remove underline */
   transition: color 0.3s ease;
 }
 
 nav .left router-link:hover {
-  color: #42b883; /* Highlight color on hover */
+  color: #42b883; /* Subtle green highlight on hover */
 }
 
 /* Right section of the navbar */
@@ -88,24 +89,25 @@ nav .right ul {
 }
 
 nav .right li {
-  margin: 0 15px;
+  margin: 0 20px;
+  position: relative;
 }
 
 nav .right router-link {
-  color: #ffffff;
+  color: #333;
   font-size: 16px;
   font-weight: 500;
-  text-decoration: none;
+  text-decoration: none; /* Remove underline */
   transition: color 0.3s ease;
 }
 
 nav .right router-link:hover {
-  color: #42b883; /* Highlight color on hover */
+  color: #42b883; /* Subtle green highlight on hover */
 }
 
 /* Button Styling */
 button {
-  background-color: #f44336; /* Red background for logout */
+  background-color: #ff9800; /* Soft orange color for logout */
   color: white;
   border: none;
   padding: 8px 20px;
@@ -117,7 +119,7 @@ button {
 }
 
 button:hover {
-  background-color: #d32f2f; /* Darker red on hover */
+  background-color: #e68900; /* Darker orange on hover */
   transform: scale(1.05); /* Slightly enlarge the button on hover */
 }
 
