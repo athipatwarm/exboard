@@ -53,16 +53,13 @@ exports.updateUser = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const user = await User.findByIdAndDelete(userId);
-    if (!user) {
-      return res.status(404).send({ error: "User not found" });
-    }
+    const user = await User.findByIdAndDelete(req.user._id);
+    if (!user) return res.status(404).json({ error: 'User not found.' });
 
-    res.status(200).send({ message: "User account deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting user account:", error);
-    res.status(500).send({ error: "An error occurred while deleting the account" });
+    res.status(200).json({ message: 'User deleted successfully.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'An error occurred while deleting the account.' });
   }
 };
 
@@ -133,68 +130,40 @@ exports.loginUser = async (req, res) => {
 
 exports.getUserProfile = async (req, res) => {
   try {
-    const user = req.user;  // `req.user` is populated by the `auth` middleware
-    res.status(200).send(user);
-  } catch (error) {
-    res.status(500).send({ error: 'Failed to fetch user data' });
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'An error occurred while fetching the profile.' });
   }
 };
 
 exports.updateProfile = async (req, res) => {
-  const updates = Object.keys(req.body);
-  const allowedUpdates = ['username', 'email', 'password'];  // Only these fields are allowed for updates
-  const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
-
-  if (!isValidOperation) {
-    return res.status(400).send({ error: 'Invalid updates!' });
-  }
-
-  // Check if email contains '@' when updating the email
-  if (req.body.email && !req.body.email.includes('@')) {
-    return res.status(400).send({ error: 'Email must contain "@" symbol.' });
-  }
+  const { username, email, password, newPassword } = req.body;
 
   try {
-    // Ensure we are updating the currently authenticated user
     const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).send({ error: 'User not found' });
+
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+
+    if (username) user.username = username;
+    if (email) user.email = email;
+
+    if (password && newPassword) {
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(400).json({ error: 'Current password is incorrect.' });
+
+      user.password = await bcrypt.hash(newPassword, 10);
     }
-
-    // If the password is being updated, check if the current password is correct
-    if (req.body.password) {
-      // Assuming the 'password' in req.body is the new password, we will first need to verify the current password
-
-      const currentPassword = req.body.currentPassword; // Expecting the current password to be in the request body
-      if (!currentPassword) {
-        return res.status(400).send({ error: 'Current password is required' });
-      }
-
-      // Check if the current password matches the stored password
-      const isMatch = await bcrypt.compare(currentPassword, user.password);
-      if (!isMatch) {
-        return res.status(400).send({ error: 'Current password is incorrect' });
-      }
-
-      // If current password is correct, hash the new password before saving
-      user.password = await bcrypt.hash(req.body.password, 8); 
-    }
-
-    // Apply allowed updates (username, email, or password)
-    updates.forEach((update) => {
-      if (update !== 'password') { // Avoid overwriting the password if it's being updated
-        user[update] = req.body[update];
-      }
-    });
 
     await user.save();
-    res.status(200).send(user);  // Send the updated user profile
-  } catch (error) {
-    console.error(error);
-    res.status(400).send({ error: 'Error updating profile' });
+    res.json({ username: user.username, email: user.email });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'An error occurred while updating the profile.' });
   }
 };
-
 
 // Logout a user from all devices (force logout from all other sessions)
 exports.logoutUser = async (req, res) => {
@@ -217,5 +186,7 @@ exports.logoutUser = async (req, res) => {
   }
 };
 
-
+exports.logout = (req, res) => {
+  res.clearCookie('token').send({ message: 'Logged out successfully.' });
+};
 
