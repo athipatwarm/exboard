@@ -31,6 +31,7 @@
           />
         </div>
         <button @click="updateUsername" class="submit-button">Update Username</button>
+        <button @click="cancelEdit('username')" class="cancel-button">Cancel</button>
       </div>
 
       <!-- Edit Email Form -->
@@ -45,6 +46,7 @@
           />
         </div>
         <button @click="updateEmail" class="submit-button">Update Email</button>
+        <button @click="cancelEdit('email')" class="cancel-button">Cancel</button>
       </div>
 
       <!-- Edit Password Form -->
@@ -70,6 +72,7 @@
         </div>
 
         <button @click="updatePassword" class="submit-button">Update Password</button>
+        <button @click="cancelEdit('password')" class="cancel-button">Cancel</button>
       </div>
 
       <!-- Delete confirmation modal -->
@@ -260,6 +263,21 @@ export default {
       isEditingPassword.value = !isEditingPassword.value;
     };
 
+    // Cancel editing (reset form and hide edit section)
+    const cancelEdit = (field) => {
+      if (field === 'username') {
+        formData.value.username = '';
+        isEditingUsername.value = false;
+      } else if (field === 'email') {
+        formData.value.email = '';
+        isEditingEmail.value = false;
+      } else if (field === 'password') {
+        formData.value.password = '';
+        formData.value.newPassword = '';
+        isEditingPassword.value = false;
+      }
+    };
+
     // Show the delete confirmation modal
     const confirmDelete = () => {
       showDeleteModal.value = true;
@@ -311,10 +329,12 @@ export default {
       confirmDelete,
       cancelDelete,
       deleteUser,
+      cancelEdit,
     };
   },
 };
 </script>
+
 
 <style scoped>
 .profile-container {
@@ -467,5 +487,23 @@ h1 {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+.cancel-button {
+  margin-top: 10px;
+  padding: 8px 15px;
+  font-size: 1rem;
+  border: 2px solid #ccc;
+  color: #333;
+  background-color: transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+}
+
+.cancel-button:hover {
+  background-color: #ccc;
+  color: white;
 }
 </style>
