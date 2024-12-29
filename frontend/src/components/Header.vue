@@ -4,18 +4,18 @@
       <!-- Left Section for Home and Topic -->
       <div class="left">
         <ul>
-          <li><router-link to="/">Home</router-link></li>
-          <li><router-link to="/topics">Topics</router-link></li>
+          <li><router-link to="/" class="nav-button">Home</router-link></li>
+          <li><router-link to="/topics" class="nav-button">Topics</router-link></li>
         </ul>
       </div>
 
       <!-- Right Section for Login/Register or Logout/Profile -->
       <div class="right">
         <ul>
-          <li v-if="!auth.isAuthenticated"><router-link to="/login">Login</router-link></li>
-          <li v-if="!auth.isAuthenticated"><router-link to="/register">Register</router-link></li>
-          <li v-if="auth.isAuthenticated"><router-link to="/profile">Profile</router-link></li>
-          <li v-if="auth.isAuthenticated"><button @click="logout">Logout</button></li>
+          <li v-if="!auth.isAuthenticated"><router-link to="/login" class="nav-button">Login</router-link></li>
+          <li v-if="!auth.isAuthenticated"><router-link to="/register" class="nav-button">Register</router-link></li>
+          <li v-if="auth.isAuthenticated"><router-link to="/profile" class="nav-button">Profile</router-link></li>
+          <li v-if="auth.isAuthenticated"><button @click="logout" class="nav-button">Logout</button></li>
         </ul>
       </div>
     </nav>
@@ -65,20 +65,26 @@ nav .left ul {
 
 nav .left li {
   margin: 0 25px;
-  position: relative;
 }
 
-nav .left router-link {
-  color: #333; /* Set the default color to dark grey */
+nav .left router-link,
+nav .right router-link {
+  color: white; /* White text for the links/buttons */
   font-size: 16px;
-  font-weight: 600; /* Change the font weight to bold for better readability */
+  font-weight: 600; /* Bold font weight for emphasis */
   text-decoration: none; /* Remove underline */
-  font-family: 'Arial', sans-serif; /* Change to a custom font (you can use any font you prefer) */
-  transition: color 0.3s ease;
+  font-family: 'Arial', sans-serif; /* Custom font */
+  padding: 10px 20px; /* Space inside the button */
+  border-radius: 25px; /* Rounded corners for buttons */
+  background-color: #b0bec5; /* Darker grey than the navbar */
+  transition: all 0.3s ease; /* Smooth transitions */
+  display: inline-block; /* Ensure it's displayed as a block element */
+  cursor: pointer; /* Show pointer cursor on hover */
 }
 
-nav .left router-link:hover {
-  color: #42b883; /* Change to soft green on hover */
+nav .left router-link:hover,
+nav .right router-link:hover {
+  background-color: #90a4ae; /* Darker grey on hover */
 }
 
 /* Right section of the navbar */
@@ -91,36 +97,21 @@ nav .right ul {
 
 nav .right li {
   margin: 0 20px;
-  position: relative;
 }
 
-nav .right router-link {
-  color: #333; /* Set the default color to dark grey */
-  font-size: 16px;
-  font-weight: 600; /* Change the font weight to bold */
-  text-decoration: none; /* Remove underline */
-  font-family: 'Arial', sans-serif; /* Change to a custom font */
-  transition: color 0.3s ease;
-}
-
-nav .right router-link:hover {
-  color: #42b883; /* Subtle green highlight on hover */
-}
-
-/* Button Styling */
-button {
-  background-color: #ff9800; /* Soft orange color for logout */
+nav .right button {
+  background-color: #ff9800; /* Soft orange color for logout button */
   color: white;
   border: none;
-  padding: 8px 20px;
-  border-radius: 25px; /* Rounded corners for modern style */
+  padding: 10px 20px;
+  border-radius: 25px; /* Rounded corners for logout button */
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-button:hover {
+nav .right button:hover {
   background-color: #e68900; /* Darker orange on hover */
   transform: scale(1.05); /* Slightly enlarge the button on hover */
 }
