@@ -105,42 +105,42 @@ export default {
       }
     });
 
-    // Handle profile update
     const updateProfile = async () => {
-      errorMessage.value = "";
-      successMessage.value = "";
+    errorMessage.value = "";
+    successMessage.value = "";
 
-      const updatedData = { ...formData.value };
-      // If password is empty, don't include it in the update request
-      if (!updatedData.newPassword) delete updatedData.newPassword;
+    const updatedData = { ...formData.value };
+    // If password is empty, don't include it in the update request
+    if (!updatedData.newPassword) delete updatedData.newPassword;
 
-      try {
-        const response = await fetch("/api/users/me", {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${authStore.token}`,
-          },
-          body: JSON.stringify(updatedData),
-        });
-        const data = await response.json();
+    try {
+      const response = await fetch("/api/users/me", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authStore.token}`,
+        },
+        body: JSON.stringify(updatedData),
+      });
+      const data = await response.json();
 
-        if (!response.ok) {
-          errorMessage.value = data.error || "Something went wrong.";
-        } else {
-          successMessage.value = "Profile updated successfully!";
-          // Update local data after success
-          user.value = { ...data };
-          formData.value.username = data.username;
-          formData.value.email = data.email;
-          formData.value.password = "";
-          formData.value.newPassword = "";
-        }
-      } catch (error) {
-        errorMessage.value = "Error updating profile";
-        console.error(error);
+      if (!response.ok) {
+        errorMessage.value = data.error || "Something went wrong.";
+    }  else {
+        successMessage.value = "Profile updated successfully!";
+        // Update local data after success
+        user.value = { ...data };
+        formData.value.username = data.username;
+        formData.value.email = data.email;
+        formData.value.password = "";
+        formData.value.newPassword = "";
       }
-    };
+    } catch (error) {
+      errorMessage.value = "Error updating profile";
+      console.error(error);
+    }
+  };
+
 
     // Toggle edit form visibility
     const toggleEditProfile = () => {

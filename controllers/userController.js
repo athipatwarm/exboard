@@ -140,11 +140,13 @@ exports.updateProfile = async (req, res) => {
   }
 
   try {
+    // Ensure we are updating the currently authenticated user
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).send();
     }
 
+    // Only allow the user to update their own profile
     if (req.body.password) {
       // Check if the current password matches
       const isMatch = await user.checkPassword(req.body.password);
