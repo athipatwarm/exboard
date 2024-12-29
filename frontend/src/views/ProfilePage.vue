@@ -1,3 +1,78 @@
+<template>
+  <div class="profile-container">
+    <h1>Profile Page</h1>
+
+    <!-- Display user data -->
+    <div class="profile-info">
+      <p><strong>Username:</strong> {{ user.username }}</p>
+      <button v-if="!isEditingUsername" @click="toggleEditUsername" class="edit-button">Edit Username</button>
+
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <button v-if="!isEditingEmail" @click="toggleEditEmail" class="edit-button">Edit Email</button>
+
+      <!-- Password edit section -->
+      <button v-if="!isEditingPassword" @click="toggleEditPassword" class="edit-button">Change Password</button>
+    </div>
+
+    <!-- Edit Username Form -->
+    <div v-if="isEditingUsername" class="profile-edit-form">
+      <div class="input-group">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          v-model="formData.username"
+          placeholder="Enter new username"
+        />
+      </div>
+      <button @click="updateUsername" class="submit-button">Update Username</button>
+    </div>
+
+    <!-- Edit Email Form -->
+    <div v-if="isEditingEmail" class="profile-edit-form">
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          v-model="formData.email"
+          placeholder="Enter new email"
+        />
+      </div>
+      <button @click="updateEmail" class="submit-button">Update Email</button>
+    </div>
+
+    <!-- Edit Password Form -->
+    <div v-if="isEditingPassword" class="profile-edit-form">
+      <div class="input-group">
+        <label for="password">Current Password</label>
+        <input
+          type="password"
+          id="password"
+          v-model="formData.password"
+          placeholder="Enter current password"
+        />
+      </div>
+
+      <div class="input-group">
+        <label for="newPassword">New Password</label>
+        <input
+          type="password"
+          id="newPassword"
+          v-model="formData.newPassword"
+          placeholder="Enter new password"
+        />
+      </div>
+
+      <button @click="updatePassword" class="submit-button">Update Password</button>
+    </div>
+
+    <!-- Error or Success message -->
+    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+    <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
+  </div>
+</template>
+
 <script>
 import { ref, onMounted } from "vue";
 import { useAuthStore } from "../store/auth"; // assuming you have a store for authentication
@@ -65,6 +140,7 @@ export default {
         successMessage.value = "Username updated successfully!";
         user.value.username = data.username;
         formData.value.username = "";
+        isEditingUsername.value = false; // Hide the edit form
       } catch (error) {
         errorMessage.value = error.message || "Error updating username";
         console.error(error);
@@ -93,6 +169,7 @@ export default {
         successMessage.value = "Email updated successfully!";
         user.value.email = data.email;
         formData.value.email = "";
+        isEditingEmail.value = false; // Hide the edit form
       } catch (error) {
         errorMessage.value = error.message || "Error updating email";
         console.error(error);
@@ -124,6 +201,7 @@ export default {
         successMessage.value = "Password updated successfully!";
         formData.value.password = "";
         formData.value.newPassword = "";
+        isEditingPassword.value = false; // Hide the edit form
       } catch (error) {
         errorMessage.value = error.message || "Error updating password";
         console.error(error);
@@ -251,5 +329,4 @@ h1 {
   color: green;
   margin-top: 20px;
 }
-
 </style>
