@@ -3,7 +3,7 @@
     <h1>Topics</h1>
 
     <!-- Admin-only create topic button -->
-    <button v-if="isAuthenticated && isAdmin" @click="toggleCreateForm" class="create-button">
+    <button v-if="authStore.isAuthenticated && authStore.isAdmin" @click="toggleCreateForm" class="create-button">
       Create Topic
     </button>
 
@@ -35,11 +35,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth'; // Import the auth store
 
+const authStore = useAuthStore();
 const topics = ref([]);
-const isAuthenticated = ref(false);
-const isAdmin = ref(false);
 const showCreateForm = ref(false);
 const newTopic = ref({
   title: '',
@@ -61,19 +60,6 @@ const fetchTopics = async () => {
     message.value = { type: 'error', text: 'Failed to load topics.' };
   } finally {
     isLoading.value = false;
-  }
-};
-
-const checkAuth = () => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    const decodedToken = JSON.parse(atob(token.split('.')[1]));
-    isAuthenticated.value = true;
-    isAdmin.value = decodedToken.role === 'admin';
-    
-    // Check the values and log to console
-    console.log('isAuthenticated:', isAuthenticated.value);
-    console.log('isAdmin:', isAdmin.value);
   }
 };
 
@@ -118,8 +104,8 @@ const cancelCreateForm = () => {
 };
 
 onMounted(() => {
+  authStore.checkAuth();  // Check if the user is authenticated
   fetchTopics();
-  checkAuth();
 });
 </script>
 
