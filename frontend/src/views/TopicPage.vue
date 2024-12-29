@@ -1,3 +1,37 @@
+<template>
+  <div class="topic-page">
+    <h1>Topics</h1>
+
+    <!-- Admin-only create topic button -->
+    <button v-if="isAuthenticated && isAdmin" @click="toggleCreateForm" class="create-button">
+      Create Topic
+    </button>
+
+    <!-- Topic creation form -->
+    <div v-if="showCreateForm" class="create-form">
+      <form @submit.prevent="createTopic">
+        <input type="text" v-model="newTopic.title" placeholder="Title" required class="input" />
+        <textarea v-model="newTopic.description" placeholder="Description" required class="input"></textarea>
+        <div class="form-actions">
+          <button type="submit" :disabled="isLoading" class="button submit-button">Create</button>
+          <button type="button" @click="cancelCreateForm" class="button cancel-button">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- List of topics -->
+    <ul v-if="topics.length" class="topic-list">
+      <li v-for="topic in topics" :key="topic._id">
+        <router-link :to="`/topic/${topic.name}`" class="topic-link">{{ topic.name }}</router-link>
+      </li>
+    </ul>
+
+    <!-- Loading and message states -->
+    <div v-if="isLoading" class="loading">Loading...</div>
+    <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
+  </div>
+</template>
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
