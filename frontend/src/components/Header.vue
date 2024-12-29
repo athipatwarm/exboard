@@ -69,15 +69,16 @@ nav .left li {
 }
 
 nav .left router-link {
-  color: #333;
+  color: #333; /* Set the default color to dark grey */
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600; /* Change the font weight to bold for better readability */
   text-decoration: none; /* Remove underline */
+  font-family: 'Arial', sans-serif; /* Change to a custom font (you can use any font you prefer) */
   transition: color 0.3s ease;
 }
 
 nav .left router-link:hover {
-  color: #42b883; /* Subtle green highlight on hover */
+  color: #42b883; /* Change to soft green on hover */
 }
 
 /* Right section of the navbar */
@@ -94,10 +95,11 @@ nav .right li {
 }
 
 nav .right router-link {
-  color: #333;
+  color: #333; /* Set the default color to dark grey */
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600; /* Change the font weight to bold */
   text-decoration: none; /* Remove underline */
+  font-family: 'Arial', sans-serif; /* Change to a custom font */
   transition: color 0.3s ease;
 }
 
