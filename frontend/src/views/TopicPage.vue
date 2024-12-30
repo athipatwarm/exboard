@@ -59,14 +59,18 @@ const toggleCreateForm = () => {
 const fetchTopics = async () => {
   try {
     isLoading.value = true;
-    const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics`);
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    });
     topics.value = response.data;
   } catch (error) {
-    handleError("Failed to load topics.", error);
+    console.error('Error fetching topics:', error);
+    message.value = { type: 'error', text: 'Failed to fetch topics.' };
   } finally {
     isLoading.value = false;
   }
 };
+
 
 const createTopic = async () => {
   if (!newTopic.value.title || !newTopic.value.description) {
