@@ -32,12 +32,16 @@ exports.createTopic = async (req, res) => {
 
 exports.getAllTopics = async (req, res) => {
   try {
-    const topics = await Topic.find({}).populate('category').populate('author');
+    const topics = await Topic.find({})
+      .populate('category')
+      .populate('author', 'name')  // Ensure that 'author' is populated
+      .populate('moderators', 'name');
     res.status(200).send(topics);
   } catch (error) {
     res.status(400).send(error);
   }
 };
+
 
 exports.getTopicByName = async (req, res) => {
   const topicName = req.params.topicName;  // Capture the topicName from the URL

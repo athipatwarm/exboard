@@ -24,6 +24,7 @@
           <div class="topic-title">{{ topic.title }}</div>
           <div class="topic-description">{{ topic.description }}</div>
           <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>
+          <div v-if="topic.author" class="topic-author">Author: {{ topic.author.name }}</div> <!-- Display author's name -->
         </router-link>
       </div>
     </div>
