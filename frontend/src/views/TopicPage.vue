@@ -19,9 +19,11 @@
 
     <div v-if="topics.length" class="topic-list">
       <div v-for="topic in topics" :key="topic._id" class="topic-box">
-        <router-link :to="`/topic/${topic.name}`" class="topic-link">
-          <div class="topic-name">{{ topic.name }}</div>
+        <!-- Use title as the link identifier -->
+        <router-link :to="`/topic/${topic._id}`" class="topic-link">
+          <div class="topic-title">{{ topic.title }}</div>
           <div class="topic-description">{{ topic.description }}</div>
+          <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>
         </router-link>
       </div>
     </div>
@@ -111,6 +113,7 @@ onMounted(() => {
   fetchTopics(); // Fetch topics when the page loads
 });
 </script>
+
 
 <style scoped>
 .topic-page {
