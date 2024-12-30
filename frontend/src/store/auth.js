@@ -19,16 +19,19 @@ export const useAuthStore = defineStore('auth', {
           this.isAuthenticated = true;
           this.user = response.data;
           this.isAdmin = response.data.role === 'admin';
-          console.log('Token:', localStorage.getItem('token'));
         } catch (error) {
-          // console.error('Authentication check failed:', error);
-          // this.logout(); // Clear session on failure
+          console.error('Authentication check failed:', error);
+          this.isAuthenticated = false; // Update state
+          this.user = null;
+          this.isAdmin = false;
         }
       } else {
-        // this.logout(); // Ensure cleanup if no token
-        // console.log('Token:', localStorage.getItem('token'));
+        this.isAuthenticated = false; // Ensure proper cleanup
+        this.user = null;
+        this.isAdmin = false;
       }
-    },
+    }
+    ,
 
     async login(email, password) {
       try {
