@@ -35,7 +35,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { useAuthStore } from '../stores/auth'; // Import the auth store
+import { useAuthStore } from '../store/auth'; // Import the auth store
 
 const authStore = useAuthStore();
 const topics = ref([]);
