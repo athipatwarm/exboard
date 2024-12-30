@@ -6,12 +6,6 @@
     <div class="created-at">Created at: {{ new Date(topic.createdAt).toLocaleString() }}</div>
     
     <div v-if="topic.author" class="topic-author">Author: {{ topic.author.name }}</div>
-    <div v-if="topic.moderators.length" class="topic-moderators">
-      Moderators: 
-      <ul>
-        <li v-for="moderator in topic.moderators" :key="moderator._id">{{ moderator.name }}</li>
-      </ul>
-    </div>
 
     <div v-if="isLoading" class="loading">Loading...</div>
     <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
