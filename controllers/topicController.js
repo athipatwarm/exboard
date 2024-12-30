@@ -34,7 +34,7 @@ exports.getAllTopics = async (req, res) => {
   try {
     const topics = await Topic.find({})
       .populate('category')
-      .populate('author', 'name')  // Ensure that 'author' is populated
+      .populate('author', 'name')  
       .populate('moderators', 'name');
     res.status(200).send(topics);
   } catch (error) {
@@ -42,13 +42,12 @@ exports.getAllTopics = async (req, res) => {
   }
 };
 
-
 exports.getTopicByName = async (req, res) => {
-  const topicName = req.params.topicName;  // Capture the topicName from the URL
+  const topicName = req.params.topicName;
   try {
     const topic = await Topic.findOne({ title: topicName })
       .populate('category')
-      .populate('author', 'name') 
+      .populate('author', 'name')  
       .populate('moderators', 'name');
     
     if (!topic) {
@@ -59,6 +58,7 @@ exports.getTopicByName = async (req, res) => {
     res.status(400).send(error);
   }
 };
+
 
 // Update a topic by ID
 exports.updateTopic = async (req, res) => {
