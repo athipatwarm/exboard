@@ -21,12 +21,12 @@ export const useAuthStore = defineStore('auth', {
           this.isAdmin = response.data.role === 'admin';
           console.log('Token:', localStorage.getItem('token'));
         } catch (error) {
-          console.error('Authentication check failed:', error);
-          this.logout(); // Clear session on failure
+          // console.error('Authentication check failed:', error);
+          // this.logout(); // Clear session on failure
         }
       } else {
-        this.logout(); // Ensure cleanup if no token
-        console.log('Token:', localStorage.getItem('token'));
+        // this.logout(); // Ensure cleanup if no token
+        // console.log('Token:', localStorage.getItem('token'));
       }
     },
 
