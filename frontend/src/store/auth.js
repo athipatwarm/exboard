@@ -3,81 +3,75 @@ import axios from 'axios';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    isAuthenticated: false, // Default authentication state
+    isAuthenticated: false,
+    isAdmin: false, // Track admin status
+    user: null, // Store user information
   }),
 
   actions: {
-    // Check if user is authenticated based on token
-    checkAuth() {
+    async checkAuth() {
       const token = this.getCookie('token');
       if (token) {
-        this.isAuthenticated = true; // Token exists in cookies
-      } else {
-        const storedToken = localStorage.getItem('token');
-        if (storedToken) {
+        try {
+          const response = await axios.get(`${import.meta.env.VITE_API_URL}/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           this.isAuthenticated = true;
-          this.setCookie('token', storedToken); // Sync cookie with localStorage
-        } else {
-          this.isAuthenticated = false; // No token found
+          this.user = response.data;
+          this.isAdmin = response.data.role === 'admin';
+        } catch (error) {
+          console.error('Authentication check failed:', error);
+          this.logout(); // Clear session on failure
         }
+      } else {
+        this.logout(); // Ensure cleanup if no token
       }
     },
 
-    // Log in the user and store the authentication token
     async login(email, password) {
       try {
         const response = await axios.post(`${import.meta.env.VITE_API_URL}/login`, { email, password });
         const token = response.data.token;
 
-        // Store the token in localStorage and set it as a cookie
         localStorage.setItem('token', token);
         this.setCookie('token', token);
+
         this.isAuthenticated = true;
+        this.user = response.data.user; // Assuming user info is returned
+        this.isAdmin = response.data.user.role === 'admin';
       } catch (error) {
         console.error('Login failed:', error);
         throw new Error(error.response?.data?.message || 'Login failed. Please try again.');
       }
     },
 
-    // Log out the user and clear the authentication state
     async logout() {
       try {
         await axios.post(`${import.meta.env.VITE_API_URL}/logout`, {}, {
-          headers: {
-            Authorization: `Bearer ${this.getCookie('token')}`,
-          },
+          headers: { Authorization: `Bearer ${this.getCookie('token')}` },
         });
-
-        // Clear token from localStorage and cookies
-        localStorage.removeItem('token');
-        this.deleteCookie('token');
-        this.isAuthenticated = false;
       } catch (error) {
         console.error('Logout failed:', error);
-        // Fallback: Clear token even if the API call fails
+      } finally {
         localStorage.removeItem('token');
         this.deleteCookie('token');
         this.isAuthenticated = false;
+        this.isAdmin = false;
+        this.user = null;
       }
     },
 
-    // Utility function to get a cookie by name
     getCookie(name) {
-      const cookieString = document.cookie
-        .split('; ')
-        .find(row => row.startsWith(`${name}=`));
+      const cookieString = document.cookie.split('; ').find(row => row.startsWith(`${name}=`));
       return cookieString ? cookieString.split('=')[1] : null;
     },
 
-    // Utility function to set a cookie
     setCookie(name, value, days = 7) {
       const date = new Date();
       date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-      const expires = `expires=${date.toUTCString()}`;
-      document.cookie = `${name}=${value}; ${expires}; path=/; Secure; SameSite=Strict`;
+      document.cookie = `${name}=${value}; expires=${date.toUTCString()}; path=/; Secure; SameSite=Strict`;
     },
 
-    // Utility function to delete a cookie
     deleteCookie(name) {
       document.cookie = `${name}=; Max-Age=0; path=/; Secure; SameSite=Strict`;
     },
