@@ -10,16 +10,6 @@
       <form @submit.prevent="createTopic">
         <input type="text" v-model="newTopic.title" placeholder="Title" required class="input" />
         <textarea v-model="newTopic.description" placeholder="Description" required class="input"></textarea>
-        
-        <!-- Add a multi-select dropdown for moderators -->
-        <div>
-          <label for="moderators">Select Moderators:</label>
-          <select v-model="newTopic.moderators" multiple class="input">
-            <option v-for="moderator in availableModerators" :key="moderator._id" :value="moderator._id">
-              {{ moderator.name }}
-            </option>
-          </select>
-        </div>
 
         <div class="form-actions">
           <button type="submit" :disabled="isLoading" class="button submit-button">Create</button>
@@ -34,12 +24,6 @@
           <div class="topic-title">{{ topic.title }}</div>
           <div class="topic-description">{{ topic.description }}</div>
           <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>
-          <div v-if="topic.moderators.length" class="topic-moderators">
-            Moderators:
-            <ul>
-              <li v-for="moderator in topic.moderators" :key="moderator._id">{{ moderator.name }}</li>
-            </ul>
-          </div>
         </router-link>
       </div>
     </div>
