@@ -55,7 +55,7 @@ const fetchTopics = async () => {
     const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    topics.value = response.data;
+    topics.value = response.data; // Populate the topics array with fetched data
   } catch (error) {
     console.error('Error fetching topics:', error);
     message.value = { type: 'error', text: 'Failed to fetch topics.' };
@@ -80,7 +80,7 @@ const createTopic = async () => {
     });
 
     message.value = { type: 'success', text: 'Topic created successfully!' };
-    fetchTopics();
+    fetchTopics(); // Re-fetch topics after creating one
     resetCreateForm();
   } catch (error) {
     handleError("Failed to create topic.", error);
@@ -104,8 +104,8 @@ const handleError = (defaultMessage, error) => {
 };
 
 onMounted(() => {
-  authStore.checkAuth();
-  fetchTopics();
+  authStore.checkAuth(); // Make sure authentication is checked when component is mounted
+  fetchTopics(); // Fetch topics when the page loads
 });
 </script>
 
