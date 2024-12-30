@@ -20,7 +20,7 @@
     <div v-if="topics.length" class="topic-list">
       <div v-for="topic in topics" :key="topic._id" class="topic-box">
         <!-- Use title as the link identifier -->
-        <router-link :to="`/topic/${topic._id}`" class="topic-link">
+        <router-link :to="`/topic/${topic.title}`" class="topic-link">
           <div class="topic-title">{{ topic.title }}</div>
           <div class="topic-description">{{ topic.description }}</div>
           <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>

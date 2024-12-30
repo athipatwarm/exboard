@@ -21,15 +21,20 @@ const isLoading = ref(false);
 const message = ref(null);
 
 const fetchTopicDetails = async () => {
+  const topicName = route.params.topicName;  // Extract topicName from route params
+  if (!topicName) {
+    message.value = { type: 'error', text: 'Topic name is missing in the URL.' };
+    return;
+  }
+
   try {
     isLoading.value = true;
     const token = localStorage.getItem('token');
-    const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics/${route.params.id}`, {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics/${topicName}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    // Update the topic object to match the received data
-    topic.value = response.data; // Ensure the response data matches the topic model from the backend
+    topic.value = response.data;
   } catch (error) {
     console.error('Error fetching topic details:', error);
     message.value = { type: 'error', text: 'Failed to fetch topic details.' };
