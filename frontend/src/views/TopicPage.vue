@@ -2,16 +2,10 @@
   <div class="topic-page">
     <h1>Topics</h1>
 
-    <!-- Admin-only create topic button -->
-    <button 
-      v-if="authStore.isAuthenticated && authStore.isAdmin" 
-      @click="toggleCreateForm" 
-      class="create-button"
-    >
+    <button v-if="authStore.isAuthenticated && authStore.isAdmin" @click="toggleCreateForm" class="create-button">
       Create Topic
     </button>
 
-    <!-- Topic creation form -->
     <div v-if="showCreateForm" class="create-form">
       <form @submit.prevent="createTopic">
         <input type="text" v-model="newTopic.title" placeholder="Title" required class="input" />
@@ -23,7 +17,6 @@
       </form>
     </div>
 
-    <!-- List of topics -->
     <ul v-if="topics.length" class="topic-list">
       <li v-for="topic in topics" :key="topic._id">
         <router-link :to="`/topic/${topic.name}`" class="topic-link">{{ topic.name }}</router-link>
@@ -31,7 +24,6 @@
     </ul>
     <div v-else class="empty-list">No topics available. Please create one.</div>
 
-    <!-- Loading and message states -->
     <div v-if="isLoading" class="loading">Loading...</div>
     <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
   </div>
@@ -40,7 +32,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import { useAuthStore } from '../store/auth'; // Import the auth store
+import { useAuthStore } from '../store/auth';
 
 const authStore = useAuthStore();
 const topics = ref([]);
@@ -59,8 +51,9 @@ const toggleCreateForm = () => {
 const fetchTopics = async () => {
   try {
     isLoading.value = true;
+    const token = localStorage.getItem('token') || authStore.getCookie('token');
     const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
     topics.value = response.data;
   } catch (error) {
@@ -71,7 +64,6 @@ const fetchTopics = async () => {
   }
 };
 
-
 const createTopic = async () => {
   if (!newTopic.value.title || !newTopic.value.description) {
     message.value = { type: 'error', text: 'Title and description are required.' };
@@ -80,18 +72,12 @@ const createTopic = async () => {
 
   try {
     isLoading.value = true;
-    const topicData = {
-      title: newTopic.value.title,
-      description: newTopic.value.description,
-    };
+    const token = localStorage.getItem('token') || authStore.getCookie('token');
+    const topicData = { title: newTopic.value.title, description: newTopic.value.description };
 
-    await axios.post(
-      `${import.meta.env.VITE_API_URL}/topics`,
-      topicData,
-      {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      }
-    );
+    await axios.post(`${import.meta.env.VITE_API_URL}/topics`, topicData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
     message.value = { type: 'success', text: 'Topic created successfully!' };
     fetchTopics();
@@ -118,7 +104,7 @@ const handleError = (defaultMessage, error) => {
 };
 
 onMounted(() => {
-  authStore.checkAuth(); // Check if the user is authenticated
+  authStore.checkAuth();
   fetchTopics();
 });
 </script>
