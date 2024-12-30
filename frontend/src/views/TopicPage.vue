@@ -3,7 +3,11 @@
     <h1>Topics</h1>
 
     <!-- Admin-only create topic button -->
-    <button v-if="authStore.isAuthenticated && authStore.isAdmin" @click="toggleCreateForm" class="create-button">
+    <button 
+      v-if="authStore.isAuthenticated && authStore.isAdmin" 
+      @click="toggleCreateForm" 
+      class="create-button"
+    >
       Create Topic
     </button>
 
@@ -25,6 +29,7 @@
         <router-link :to="`/topic/${topic.name}`" class="topic-link">{{ topic.name }}</router-link>
       </li>
     </ul>
+    <div v-else class="empty-list">No topics available. Please create one.</div>
 
     <!-- Loading and message states -->
     <div v-if="isLoading" class="loading">Loading...</div>
@@ -57,7 +62,7 @@ const fetchTopics = async () => {
     const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics`);
     topics.value = response.data;
   } catch (error) {
-    message.value = { type: 'error', text: 'Failed to load topics.' };
+    handleError("Failed to load topics.", error);
   } finally {
     isLoading.value = false;
   }
@@ -88,7 +93,7 @@ const createTopic = async () => {
     fetchTopics();
     resetCreateForm();
   } catch (error) {
-    message.value = { type: 'error', text: 'Failed to create topic.' };
+    handleError("Failed to create topic.", error);
   } finally {
     isLoading.value = false;
   }
@@ -103,8 +108,13 @@ const cancelCreateForm = () => {
   resetCreateForm();
 };
 
+const handleError = (defaultMessage, error) => {
+  const errorMessage = error.response?.data?.message || defaultMessage;
+  message.value = { type: 'error', text: errorMessage };
+};
+
 onMounted(() => {
-  authStore.checkAuth();  // Check if the user is authenticated
+  authStore.checkAuth(); // Check if the user is authenticated
   fetchTopics();
 });
 </script>
@@ -197,6 +207,13 @@ h1 {
 
 .topic-link:hover {
   text-decoration: underline;
+}
+
+.empty-list {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+  margin-top: 20px;
 }
 
 .loading {
