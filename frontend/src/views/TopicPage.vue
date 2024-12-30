@@ -10,6 +10,17 @@
       <form @submit.prevent="createTopic">
         <input type="text" v-model="newTopic.title" placeholder="Title" required class="input" />
         <textarea v-model="newTopic.description" placeholder="Description" required class="input"></textarea>
+        
+        <!-- Add a multi-select dropdown for moderators -->
+        <div>
+          <label for="moderators">Select Moderators:</label>
+          <select v-model="newTopic.moderators" multiple class="input">
+            <option v-for="moderator in availableModerators" :key="moderator._id" :value="moderator._id">
+              {{ moderator.name }}
+            </option>
+          </select>
+        </div>
+
         <div class="form-actions">
           <button type="submit" :disabled="isLoading" class="button submit-button">Create</button>
           <button type="button" @click="cancelCreateForm" class="button cancel-button">Cancel</button>
@@ -82,8 +93,18 @@ const createTopic = async () => {
 
   try {
     isLoading.value = true;
+
+    // Get the current user (assumed to be the author)
     const token = localStorage.getItem('token') || authStore.getCookie('token');
-    const topicData = { title: newTopic.value.title, description: newTopic.value.description };
+    const user = authStore.user;  // Assuming user info is stored in authStore after login
+
+    // Set author and moderators (if applicable)
+    const topicData = {
+      title: newTopic.value.title,
+      description: newTopic.value.description,
+      author: user._id,  // Assign the logged-in user as the author
+      moderators: newTopic.value.moderators || [],  // Include moderators if specified
+    };
 
     await axios.post(`${import.meta.env.VITE_API_URL}/topics`, topicData, {
       headers: { Authorization: `Bearer ${token}` },
