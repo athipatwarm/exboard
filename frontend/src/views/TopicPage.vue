@@ -80,12 +80,12 @@ const createTopic = async () => {
     isLoading.value = true;
 
     const token = localStorage.getItem('token') || authStore.getCookie('token');
-    const user = authStore.user;  // Assuming user info is stored in authStore after login
+    const user = authStore.user; 
 
     const topicData = {
       title: newTopic.value.title,
       description: newTopic.value.description,
-      author: user._id,  // Make sure you're sending the author's _id
+      author: user._id,
       moderators: newTopic.value.moderators || [],
     };
 
@@ -94,7 +94,7 @@ const createTopic = async () => {
     });
 
     message.value = { type: 'success', text: 'Topic created successfully!' };
-    fetchTopics(); // Re-fetch topics after creating one
+    fetchTopics(); 
     resetCreateForm();
   } catch (error) {
     handleError("Failed to create topic.", error);
@@ -120,7 +120,7 @@ const handleError = (defaultMessage, error) => {
 
 onMounted(() => {
   authStore.checkAuth();
-  fetchTopics(); // Fetch topics when the page loads
+  fetchTopics(); 
 });
 </script>
 

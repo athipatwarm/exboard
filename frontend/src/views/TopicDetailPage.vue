@@ -6,9 +6,8 @@
       <p>{{ topic.description }}</p>
       <div class="created-at">Created at: {{ new Date(topic.createdAt).toLocaleString() }}</div>
 
-      <div v-if="topic.author" class="topic-author">Author: {{ topic.author.name }}</div>
+      <div v-if="topic.author" class="topic-author">Author: {{ topic.author.username }}</div>
 
-      <!-- Button to delete the topic, visible only for admin users -->
       <div v-if="isAdmin" class="delete-button-container">
         <button @click="deleteTopic" class="delete-button">Delete Topic</button>
       </div>
@@ -24,14 +23,14 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
-import { useAuthStore } from '../store/auth'; // Assuming you have an auth store
+import { useAuthStore } from '../store/auth';
 
 const route = useRoute(); 
-const router = useRouter();  // Use this to navigate after deletion
+const router = useRouter(); 
 const topic = ref({});
 const isLoading = ref(false);
 const message = ref(null);
-const isAdmin = ref(false);  // To check if the user is an admin
+const isAdmin = ref(false); 
 
 const fetchTopicDetails = async () => {
   const topicName = decodeURIComponent(route.params.topicName); 
@@ -48,7 +47,7 @@ const fetchTopicDetails = async () => {
     });
 
     topic.value = response.data;
-    isAdmin.value = useAuthStore().isAdmin; // Check if the user is an admin
+    isAdmin.value = useAuthStore().isAdmin;
   } catch (error) {
     console.error('Error fetching topic details:', error);
     message.value = { type: 'error', text: 'Failed to fetch topic details.' };
@@ -67,7 +66,7 @@ const deleteTopic = async () => {
     });
 
     message.value = { type: 'success', text: 'Topic deleted successfully!' };
-    router.push('/topics'); // Redirect to topics list after deletion
+    router.push('/topics'); 
   } catch (error) {
     message.value = { type: 'error', text: 'Failed to delete topic.' };
   } finally {

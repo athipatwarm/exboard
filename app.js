@@ -26,17 +26,14 @@ app.use(cookieParser());
 connectDB();
 
 // Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5713', // Allow localhost or your Heroku frontend URL
-}));
-app.use(express.json());  // To parse incoming JSON request bodies
-app.use(bodyParser.urlencoded({ extended: false })); // To parse URL-encoded bodies (optional, based on your needs)
+app.use(cors({origin: process.env.FRONTEND_URL || 'http://localhost:5713', }));
+app.use(express.json());  
+app.use(bodyParser.urlencoded({ extended: false })); 
 
-// Serve static files (your frontend build)
 app.use(express.static(path.join(__dirname, 'frontend/dist')));
 
 // Routes
-app.use('/api', userRoutes);  // Define your API routes
+app.use('/api', userRoutes);  
 app.use('/api', categoryRoutes);
 app.use('/api', topicRoutes);
 app.use('/api', postRoutes);

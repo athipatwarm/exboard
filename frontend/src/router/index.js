@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore } from '../store/auth';  // Import your Pinia store
+import { useAuthStore } from '../store/auth';
 import HomePage from '../views/HomePage.vue';
 import TopicPage from '../views/TopicPage.vue';
 import TopicDetailPage from '../views/TopicDetailPage.vue';  
@@ -51,27 +51,26 @@ const router = createRouter({
 
 // Global navigation guard for authentication check
 router.beforeEach((to, from, next) => {
-  const auth = useAuthStore();  // Access the Pinia auth store
+  const auth = useAuthStore(); 
 
-  // Log authentication status
   console.log('Before Each Route Navigation - Auth Status:', auth.isAuthenticated);
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!auth.isAuthenticated) {
       console.log('Not authenticated, redirecting to login');
-      next('/login'); // Redirect to login if not authenticated
+      next('/login'); 
     } else {
-      next(); // Proceed if authenticated
+      next(); 
     }
   } else if (to.matched.some(record => record.meta.requiresUnauth)) {
     if (auth.isAuthenticated) {
       console.log('Already authenticated, redirecting to profile');
-      next('/profile'); // Redirect to profile if already authenticated
+      next('/profile'); 
     } else {
-      next(); // Proceed if not authenticated
+      next(); 
     }
   } else {
-    next(); // Always allow navigation for routes that don't require auth
+    next();
   }
 });
 

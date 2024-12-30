@@ -1,4 +1,4 @@
-const User = require('../models/User');  // Assuming you have a User model
+const User = require('../models/User'); 
 
 const revokeAllTokens = async () => {
   try {

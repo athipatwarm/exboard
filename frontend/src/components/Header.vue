@@ -49,8 +49,8 @@ const logout = () => {
 <style scoped>
 /* General header styling */
 header {
-  background-color: #fff; /* Clean white background */
-  color: #333; /* Darker text for contrast */
+  background-color: #fff; 
+  color: #333; 
   padding: 15px 30px;
   display: flex;
   justify-content: space-between;
@@ -64,7 +64,6 @@ nav {
   align-items: center;
 }
 
-/* Left section of the navbar */
 nav .left ul {
   list-style: none;
   display: flex;
@@ -104,14 +103,14 @@ nav .right li {
 }
 
 nav .logout {
-  background-color: #e57373; /* Red background for logout */
+  background-color: #e57373; 
   color: white;
   padding: 8px 18px;
   border-radius: 30px;
 }
 
 nav .logout:hover {
-  background-color: #f44336; /* Darker red on hover */
+  background-color: #f44336; 
 }
 
 /* Mobile responsiveness */

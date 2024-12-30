@@ -67,8 +67,6 @@ userSchema.methods.generateAuthToken = async function () {
   return token;
 };
 
-
-// Check password
 userSchema.methods.checkPassword = async function (password) {
   const isMatch = await bcrypt.compare(password, this.password);
   return isMatch;

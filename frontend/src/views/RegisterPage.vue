@@ -49,7 +49,6 @@ const registerUser = async () => {
     username.value = '';
     email.value = '';
     password.value = '';
-    // Optionally redirect to login page here.
   } catch (error) {
     errorMessage.value = error.response?.data?.error || 'Registration failed. Please try again.';
   }

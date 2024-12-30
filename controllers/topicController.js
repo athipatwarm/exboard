@@ -19,7 +19,7 @@ exports.createTopic = async (req, res) => {
       title,
       description,
       author: req.user._id,
-      moderators: [req.user._id], // Add the creator as a moderator
+      moderators: [req.user._id], 
     });
     await topic.save();
     res.status(201).json(topic);
@@ -32,9 +32,9 @@ exports.createTopic = async (req, res) => {
 exports.getAllTopics = async (req, res) => {
   try {
     const topics = await Topic.find({})
-      .populate('category', 'name') // Populates category with its name
-      .populate('author', 'name') // Populates author's name
-      .populate('moderators', 'name'); // Populates moderators' names
+      .populate('category', 'name') 
+      .populate('author', 'name') 
+      .populate('moderators', 'name'); 
     res.status(200).json(topics);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch topics.', details: error.message });
@@ -120,11 +120,11 @@ exports.approveTopicRequest = async (req, res) => {
 
     topic.author = topic.requestedBy;
     topic.moderators.push(topic.requestedBy);
-    topic.requestedBy = undefined; // Remove the request field
+    topic.requestedBy = undefined; 
     await topic.save();
 
     const user = await User.findById(topic.author);
-    user.role = 'moderator'; // Promote the user
+    user.role = 'moderator';
     await user.save();
 
     res.status(200).json({ message: 'Topic approved successfully.', topic });
