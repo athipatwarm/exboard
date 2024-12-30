@@ -3,9 +3,9 @@ import axios from 'axios';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null,
-    token: null,
+    isAuthenticated: false, // Default authentication state
   }),
+
   actions: {
     // Check if user is authenticated based on token
     checkAuth() {
@@ -23,32 +23,43 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    // Log in the user and store the authentication token
     async login(email, password) {
       try {
-        const response = await axios.post('/api/login', { email, password });
-        this.user = response.data.user;
-        this.token = response.data.token;  // Assuming token is sent in response
-        localStorage.setItem('token', this.token);  // Optionally store in local storage
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/login`, { email, password });
+        const token = response.data.token;
+
+        // Store the token in localStorage and set it as a cookie
+        localStorage.setItem('token', token);
+        this.setCookie('token', token);
+        this.isAuthenticated = true;
       } catch (error) {
-        throw new Error('Invalid login credentials');
+        console.error('Login failed:', error);
+        throw new Error(error.response?.data?.message || 'Login failed. Please try again.');
       }
     },
 
-    async register(username, email, password) {
+    // Log out the user and clear the authentication state
+    async logout() {
       try {
-        const response = await axios.post('/api/register', { username, email, password });
-        return response.data;  // Return success message, etc.
+        await axios.post(`${import.meta.env.VITE_API_URL}/logout`, {}, {
+          headers: {
+            Authorization: `Bearer ${this.getCookie('token')}`,
+          },
+        });
+
+        // Clear token from localStorage and cookies
+        localStorage.removeItem('token');
+        this.deleteCookie('token');
+        this.isAuthenticated = false;
       } catch (error) {
-        throw new Error('Registration failed. Please try again.');
+        console.error('Logout failed:', error);
+        // Fallback: Clear token even if the API call fails
+        localStorage.removeItem('token');
+        this.deleteCookie('token');
+        this.isAuthenticated = false;
       }
     },
-
-    logout() {
-      this.user = null;
-      this.token = null;
-      localStorage.removeItem('token');  // Remove token from localStorage (if applicable)
-    },
-
 
     // Utility function to get a cookie by name
     getCookie(name) {
