@@ -10,7 +10,7 @@ const topicSchema = new mongoose.Schema({
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
-    required: true
+    required: false
   },
   author: {
     type: mongoose.Schema.Types.ObjectId,
