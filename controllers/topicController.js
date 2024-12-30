@@ -4,8 +4,15 @@ const User = require('../models/User');
 exports.createTopic = async (req, res) => {
   const { title, description } = req.body;
 
+  // Validate title and description
   if (!title || !description) {
     return res.status(400).send({ error: "Title and description are required." });
+  }
+
+  // Check if the topic with this title already exists
+  const existingTopic = await Topic.findOne({ title });
+  if (existingTopic) {
+    return res.status(400).send({ error: "A topic with this title already exists." });
   }
 
   const topic = new Topic({
@@ -32,13 +39,14 @@ exports.getAllTopics = async (req, res) => {
   }
 };
 
-exports.getTopicByTitle= async (req, res) => {
-  const topicTitle = req.params.topicTitle;
+exports.getTopicByName = async (req, res) => {
+  const topicName = req.params.topicName;  // Capture the topicName from the URL
   try {
-    const topic = await Topic.findOne({ title: topicTitle })
+    const topic = await Topic.findOne({ title: topicName })
       .populate('category')
       .populate('author', 'name') 
       .populate('moderators', 'name');
+    
     if (!topic) {
       return res.status(404).send({ error: 'Topic not found' });
     }

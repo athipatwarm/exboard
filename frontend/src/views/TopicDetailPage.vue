@@ -29,8 +29,8 @@ const isLoading = ref(false);
 const message = ref(null);
 
 const fetchTopicDetails = async () => {
-  const topicTitle = decodeURIComponent(route.params.topicTitle); 
-  if (!topicTitle) {
+  const topicName = decodeURIComponent(route.params.topicName); 
+  if (!topicName) {
     message.value = { type: 'error', text: 'Topic title is missing in the URL.' };
     return;
   }
@@ -38,7 +38,7 @@ const fetchTopicDetails = async () => {
   try {
     isLoading.value = true;
     const token = localStorage.getItem('token');
-    const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics/${topicTitle}`, {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics/${topicName}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 

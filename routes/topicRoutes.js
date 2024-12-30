@@ -6,6 +6,6 @@ const { auth, adminAuth } = require('../middleware/auth');
 // Routes for topics
 router.get('/topics', topicController.getAllTopics);
 router.post('/topics', auth, adminAuth, topicController.createTopic);
-router.get('/topics/:topicTitle', topicController.getTopicByTitle);
+router.get('/topics/:topicName', topicController.getTopicByName);
 
 module.exports = router;
