@@ -79,16 +79,14 @@ const createTopic = async () => {
   try {
     isLoading.value = true;
 
-    // Get the current user (assumed to be the author)
     const token = localStorage.getItem('token') || authStore.getCookie('token');
     const user = authStore.user;  // Assuming user info is stored in authStore after login
 
-    // Set author and moderators (if applicable)
     const topicData = {
       title: newTopic.value.title,
       description: newTopic.value.description,
-      author: user._id,  // Assign the logged-in user as the author
-      moderators: newTopic.value.moderators || [],  // Include moderators if specified
+      author: user._id,  // Make sure you're sending the author's _id
+      moderators: newTopic.value.moderators || [],
     };
 
     await axios.post(`${import.meta.env.VITE_API_URL}/topics`, topicData, {
@@ -104,6 +102,7 @@ const createTopic = async () => {
     isLoading.value = false;
   }
 };
+
 
 const resetCreateForm = () => {
   newTopic.value = { title: '', description: '' };
