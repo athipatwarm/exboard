@@ -17,11 +17,14 @@
       </form>
     </div>
 
-    <ul v-if="topics.length" class="topic-list">
-      <li v-for="topic in topics" :key="topic._id">
-        <router-link :to="`/topic/${topic.name}`" class="topic-link">{{ topic.name }}</router-link>
-      </li>
-    </ul>
+    <div v-if="topics.length" class="topic-list">
+      <div v-for="topic in topics" :key="topic._id" class="topic-box">
+        <router-link :to="`/topic/${topic.name}`" class="topic-link">
+          <div class="topic-name">{{ topic.name }}</div>
+          <div class="topic-description">{{ topic.description }}</div>
+        </router-link>
+      </div>
+    </div>
     <div v-else class="empty-list">No topics available. Please create one.</div>
 
     <div v-if="isLoading" class="loading">Loading...</div>
@@ -182,21 +185,36 @@ h1 {
 }
 
 .topic-list {
-  list-style-type: none;
-  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.topic-list li {
-  margin: 10px 0;
+.topic-box {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.3s ease;
 }
 
-.topic-link {
-  text-decoration: none;
-  color: #007bff;
+.topic-box:hover {
+  background-color: #e1e1e1;
 }
 
-.topic-link:hover {
-  text-decoration: underline;
+.topic-name {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #333;
+}
+
+.topic-description {
+  font-size: 1em;
+  color: #777;
+  margin-top: 10px;
 }
 
 .empty-list {
