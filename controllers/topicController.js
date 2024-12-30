@@ -76,7 +76,7 @@ exports.deleteTopic = async (req, res) => {
   try {
     const topic = await Topic.findByIdAndDelete(_id);
     if (!topic) {
-      return res.status(404).send();
+      return res.status(404).send({ error: 'Topic not found' });
     }
     res.status(200).send(topic);
   } catch (error) {
