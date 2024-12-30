@@ -13,37 +13,37 @@ export const useAuthStore = defineStore('auth', {
       const token = this.getCookie('token');
       if (token) {
         try {
-          const response = await axios.get(`${import.meta.env.VITE_API_URL}/auth/me`, {
+          // Use /users/me instead of /auth/me since you're fetching the user's profile
+          const response = await axios.get(`${import.meta.env.VITE_API_URL}/users/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
           this.isAuthenticated = true;
-          this.user = response.data;
-          this.isAdmin = response.data.role === 'admin';
+          this.user = response.data;  // Assuming response contains user info
+          this.isAdmin = response.data.role === 'admin';  // Assuming role is in user data
         } catch (error) {
           console.error('Authentication check failed:', error);
-          this.isAuthenticated = false; // Update state
+          this.isAuthenticated = false;  // Update state if authentication fails
           this.user = null;
           this.isAdmin = false;
         }
       } else {
-        this.isAuthenticated = false; // Ensure proper cleanup
+        this.isAuthenticated = false; // Ensure proper cleanup if no token is found
         this.user = null;
         this.isAdmin = false;
       }
-    }
-    ,
+    },
 
     async login(email, password) {
       try {
         const response = await axios.post(`${import.meta.env.VITE_API_URL}/login`, { email, password });
         const token = response.data.token;
 
-        localStorage.setItem('token', token);
-        this.setCookie('token', token);
+        localStorage.setItem('token', token);  // Save token to localStorage
+        this.setCookie('token', token);        // Save token as a cookie
 
         this.isAuthenticated = true;
-        this.user = response.data.user; // Assuming user info is returned
-        this.isAdmin = response.data.user.role === 'admin';
+        this.user = response.data.user;        // Assuming user info is returned
+        this.isAdmin = response.data.user.role === 'admin';  // Set admin status
       } catch (error) {
         console.error('Login failed:', error);
         throw new Error(error.response?.data?.message || 'Login failed. Please try again.');
@@ -58,8 +58,8 @@ export const useAuthStore = defineStore('auth', {
       } catch (error) {
         console.error('Logout failed:', error);
       } finally {
-        localStorage.removeItem('token');
-        this.deleteCookie('token');
+        localStorage.removeItem('token');  // Remove token from localStorage
+        this.deleteCookie('token');        // Delete token cookie
         this.isAuthenticated = false;
         this.isAdmin = false;
         this.user = null;
