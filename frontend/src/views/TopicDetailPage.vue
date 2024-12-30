@@ -1,26 +1,37 @@
 <template>
   <div class="topic-detail">
-    <h1>{{ topic.title }}</h1>
-    <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>
-    <p>{{ topic.description }}</p>
-    <div class="created-at">Created at: {{ new Date(topic.createdAt).toLocaleString() }}</div>
-    
-    <div v-if="topic.author" class="topic-author">Author: {{ topic.author.name }}</div>
+    <div class="topic-box">
+      <h1>{{ topic.title }}</h1>
+      <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>
+      <p>{{ topic.description }}</p>
+      <div class="created-at">Created at: {{ new Date(topic.createdAt).toLocaleString() }}</div>
+
+      <div v-if="topic.author" class="topic-author">Author: {{ topic.author.name }}</div>
+
+      <!-- Button to delete the topic, visible only for admin users -->
+      <div v-if="isAdmin" class="delete-button-container">
+        <button @click="deleteTopic" class="delete-button">Delete Topic</button>
+      </div>
+    </div>
 
     <div v-if="isLoading" class="loading">Loading...</div>
     <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
   </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
+import { useAuthStore } from '../store/auth'; // Assuming you have an auth store
 
 const route = useRoute(); 
+const router = useRouter();  // Use this to navigate after deletion
 const topic = ref({});
 const isLoading = ref(false);
 const message = ref(null);
+const isAdmin = ref(false);  // To check if the user is an admin
 
 const fetchTopicDetails = async () => {
   const topicName = decodeURIComponent(route.params.topicName); 
@@ -37,9 +48,28 @@ const fetchTopicDetails = async () => {
     });
 
     topic.value = response.data;
+    isAdmin.value = useAuthStore().isAdmin; // Check if the user is an admin
   } catch (error) {
     console.error('Error fetching topic details:', error);
     message.value = { type: 'error', text: 'Failed to fetch topic details.' };
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const deleteTopic = async () => {
+  const topicId = topic.value._id;
+  try {
+    isLoading.value = true;
+    const token = localStorage.getItem('token');
+    await axios.delete(`${import.meta.env.VITE_API_URL}/topics/${topicId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    message.value = { type: 'success', text: 'Topic deleted successfully!' };
+    router.push('/topics'); // Redirect to topics list after deletion
+  } catch (error) {
+    message.value = { type: 'error', text: 'Failed to delete topic.' };
   } finally {
     isLoading.value = false;
   }
@@ -57,6 +87,14 @@ onMounted(() => {
   padding: 20px;
 }
 
+.topic-box {
+  border: 2px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
 h1 {
   font-size: 2em;
   margin-bottom: 10px;
@@ -72,13 +110,27 @@ h1 {
   margin-top: 20px;
 }
 
-.topic-moderators {
-  margin-top: 20px;
-}
-
 .created-at {
   color: #777;
   margin-top: 10px;
+}
+
+.delete-button-container {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.delete-button {
+  padding: 10px 20px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background-color: #d32f2f;
 }
 
 .loading {
