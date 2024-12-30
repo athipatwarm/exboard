@@ -19,7 +19,7 @@
 
     <div v-if="topics.length" class="topic-list">
       <div v-for="topic in topics" :key="topic._id" class="topic-box">
-        <router-link :to="`/topic/${topic.title}`" class="topic-link">
+        <router-link :to="`/topic/${encodeURIComponent(topic.title)}`" class="topic-link">
           <div class="topic-title">{{ topic.title }}</div>
           <div class="topic-description">{{ topic.description }}</div>
           <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>
@@ -32,7 +32,6 @@
         </router-link>
       </div>
     </div>
-
     <div v-else class="empty-list">No topics available. Please create one.</div>
 
     <div v-if="isLoading" class="loading">Loading...</div>

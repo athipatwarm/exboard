@@ -23,22 +23,22 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 
-const route = useRoute(); // To access route parameters
+const route = useRoute(); 
 const topic = ref({});
 const isLoading = ref(false);
 const message = ref(null);
 
 const fetchTopicDetails = async () => {
-  const topicName = route.params.topicName;  // Access the dynamic route parameter
-  if (!topicName) {
-    message.value = { type: 'error', text: 'Topic name is missing in the URL.' };
+  const topicTitle = decodeURIComponent(route.params.topicTitle); 
+  if (!topicTitle) {
+    message.value = { type: 'error', text: 'Topic title is missing in the URL.' };
     return;
   }
 
   try {
     isLoading.value = true;
     const token = localStorage.getItem('token');
-    const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics/${topicName}`, {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics/${topicTitle}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -52,10 +52,9 @@ const fetchTopicDetails = async () => {
 };
 
 onMounted(() => {
-  fetchTopicDetails(); // Fetch topic details when the page loads
+  fetchTopicDetails(); 
 });
 </script>
-
 
 <style scoped>
 .topic-detail {
