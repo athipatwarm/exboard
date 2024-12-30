@@ -32,10 +32,10 @@ exports.getAllTopics = async (req, res) => {
   }
 };
 
-exports.getTopicByName = async (req, res) => {
-  const topicName = req.params.topicName;
+exports.getTopicByTitle= async (req, res) => {
+  const topicTitle = req.params.topicTitle;
   try {
-    const topic = await Topic.findOne({ title: topicName })
+    const topic = await Topic.findOne({ title: topicTitle })
       .populate('category')
       .populate('author', 'name') 
       .populate('moderators', 'name');

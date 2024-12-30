@@ -19,7 +19,7 @@ const routes = [
     component: TopicPage,
   },
   {
-    path: '/topic/:topicName',
+    path: '/topic/:topicTitle',
     name: 'TopicDetail',
     component: TopicDetailPage,
     props: true,
