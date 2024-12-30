@@ -24,7 +24,7 @@
           <div class="topic-description">{{ topic.description }}</div>
           <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>
           <div v-if="topic.moderators.length" class="topic-moderators">
-            Moderators: 
+            Moderators:
             <ul>
               <li v-for="moderator in topic.moderators" :key="moderator._id">{{ moderator.name }}</li>
             </ul>
