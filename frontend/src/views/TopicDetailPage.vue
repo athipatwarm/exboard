@@ -5,6 +5,14 @@
     <p>{{ topic.description }}</p>
     <div class="created-at">Created at: {{ new Date(topic.createdAt).toLocaleString() }}</div>
     
+    <div v-if="topic.author" class="topic-author">Author: {{ topic.author.name }}</div>
+    <div v-if="topic.moderators.length" class="topic-moderators">
+      Moderators: 
+      <ul>
+        <li v-for="moderator in topic.moderators" :key="moderator._id">{{ moderator.name }}</li>
+      </ul>
+    </div>
+
     <div v-if="isLoading" class="loading">Loading...</div>
     <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
   </div>
@@ -15,13 +23,13 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 
-const route = useRoute();
+const route = useRoute(); // To access route parameters
 const topic = ref({});
 const isLoading = ref(false);
 const message = ref(null);
 
 const fetchTopicDetails = async () => {
-  const topicName = route.params.topicName;  // Extract topicName from route params
+  const topicName = route.params.topicName;  // Access the dynamic route parameter
   if (!topicName) {
     message.value = { type: 'error', text: 'Topic name is missing in the URL.' };
     return;
@@ -48,6 +56,7 @@ onMounted(() => {
 });
 </script>
 
+
 <style scoped>
 .topic-detail {
   max-width: 800px;
@@ -63,6 +72,15 @@ h1 {
 .topic-category {
   font-style: italic;
   margin-top: 10px;
+}
+
+.topic-author {
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+.topic-moderators {
+  margin-top: 20px;
 }
 
 .created-at {

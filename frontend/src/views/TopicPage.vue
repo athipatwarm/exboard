@@ -19,14 +19,20 @@
 
     <div v-if="topics.length" class="topic-list">
       <div v-for="topic in topics" :key="topic._id" class="topic-box">
-        <!-- Use title as the link identifier -->
         <router-link :to="`/topic/${topic.title}`" class="topic-link">
           <div class="topic-title">{{ topic.title }}</div>
           <div class="topic-description">{{ topic.description }}</div>
           <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>
+          <div v-if="topic.moderators.length" class="topic-moderators">
+            Moderators: 
+            <ul>
+              <li v-for="moderator in topic.moderators" :key="moderator._id">{{ moderator.name }}</li>
+            </ul>
+          </div>
         </router-link>
       </div>
     </div>
+
     <div v-else class="empty-list">No topics available. Please create one.</div>
 
     <div v-if="isLoading" class="loading">Loading...</div>
@@ -60,7 +66,7 @@ const fetchTopics = async () => {
     const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    topics.value = response.data; // Populate the topics array with fetched data
+    topics.value = response.data;
   } catch (error) {
     console.error('Error fetching topics:', error);
     message.value = { type: 'error', text: 'Failed to fetch topics.' };
@@ -109,18 +115,16 @@ const handleError = (defaultMessage, error) => {
 };
 
 onMounted(() => {
-  authStore.checkAuth(); // Make sure authentication is checked when component is mounted
+  authStore.checkAuth();
   fetchTopics(); // Fetch topics when the page loads
 });
 </script>
-
 
 <style scoped>
 .topic-page {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  font-family: Arial, sans-serif;
 }
 
 h1 {

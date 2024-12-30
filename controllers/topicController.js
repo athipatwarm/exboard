@@ -35,7 +35,10 @@ exports.getAllTopics = async (req, res) => {
 exports.getTopicByName = async (req, res) => {
   const topicName = req.params.topicName;
   try {
-    const topic = await Topic.findOne({ name: topicName }).populate('category').populate('author');
+    const topic = await Topic.findOne({ title: topicName })
+      .populate('category')
+      .populate('author', 'name') 
+      .populate('moderators', 'name');
     if (!topic) {
       return res.status(404).send({ error: 'Topic not found' });
     }
