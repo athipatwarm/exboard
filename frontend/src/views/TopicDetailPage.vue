@@ -174,13 +174,15 @@ const createPost = async () => {
       throw new Error('Failed to create post.');
     }
   } catch (error) {
-    console.error(error);
-    const errorMessage = error.response?.data?.error || 'Failed to create post.';
+    console.error("Frontend log: Error creating post", error);
+
+    const errorMessage = error.response ? error.response.data.error : 'Failed to create post.';
     message.value = { type: 'error', text: errorMessage };
   } finally {
     isLoading.value = false;
   }
 };
+
 
 // Cancel post creation form
 const cancelCreatePostForm = () => {

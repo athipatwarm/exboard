@@ -2,16 +2,21 @@ const mongoose = require('mongoose');
 const Post = require('../models/Post');
 const Topic = require('../models/Topic');
 
+const mongoose = require('mongoose');
+const Post = require('../models/Post');
+const Topic = require('../models/Topic');
+
+// Create a new post
 exports.createPost = async (req, res) => {
   if (!req.user) {
-    console.log("Backend log: User is not logged in.");
+    console.log("Backend log: User is not logged in.", req.user); // Log the user object to confirm its state
     return res.status(401).send({ error: 'You must be logged in to create a post' });
   }
 
   const { title, content, topic } = req.body;
 
   if (!title || !content || !topic) {
-    console.log("Backend log: Missing required fields");
+    console.log("Backend log: Missing required fields", { title, content, topic });
     return res.status(400).send({ error: 'Title, content, and topic are required' });
   }
 
@@ -46,6 +51,7 @@ exports.createPost = async (req, res) => {
     res.status(201).send(post);
   } catch (error) {
     console.error("Backend log: Error creating post", error);
+    console.error("Backend log: Error details", error.stack); // Log the stack trace for better debugging
     res.status(500).send({ error: 'Failed to create post' });
   }
 };
@@ -59,6 +65,8 @@ exports.getPostsByTopic = async (req, res) => {
     
     res.status(200).json(posts);
   } catch (error) {
+    console.error("Backend log: Error fetching posts", error);
     res.status(500).json({ error: 'Failed to fetch posts' });
   }
 };
+
