@@ -1,5 +1,6 @@
 const Topic = require('../models/Topic');
 const User = require('../models/User');
+const Post = require('../models/Post');
 
 // Create a new topic
 exports.createTopic = async (req, res) => {
