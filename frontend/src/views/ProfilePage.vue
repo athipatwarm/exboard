@@ -2,7 +2,10 @@
   <div class="profile-container">
     <h1>Profile Page</h1>
 
-    <div v-if="loading" class="loading-message">Loading...</div>
+    <div v-if="loading" class="loading-message">
+      Loading<span class="dot">.</span><span class="dot">o</span><span class="dot">0</span><span class="dot">.</span>
+    </div>
+
     <div v-else>
       <div class="profile-info">
         <p><strong>Username:</strong> {{ user.username }}</p>
@@ -330,6 +333,33 @@ h1 {
   text-align: center;
   font-size: 1.2rem;
   color: #f3a847;
+  font-weight: bold;
+}
+
+.dot {
+  animation: dot-blink 1.5s infinite steps(1);
+}
+
+.dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+.dot:nth-child(4) {
+  animation-delay: 0.9s;
+}
+
+@keyframes dot-blink {
+  50% {
+    opacity: 0;
+  }
 }
 
 .delete-button {
