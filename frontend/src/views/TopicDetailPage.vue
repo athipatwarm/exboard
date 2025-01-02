@@ -118,8 +118,8 @@ const toggleCreatePostForm = () => {
 };
 
 const createPost = async () => {
-  if (!newPost.value.title || !newPost.value.content) {
-    message.value = { type: 'error', text: 'Title and content are required.' };
+  if (!newPost.value.title || !newPost.value.content || !topic.value._id) {
+    message.value = { type: 'error', text: 'Title, content, and topic are required.' };
     return;
   }
 
@@ -158,12 +158,12 @@ const createPost = async () => {
 const cancelCreatePostForm = () => {
   newPost.value = { title: '', content: '' };
   showCreatePostForm.value = false;
-  message.value = null; // Reset message when canceling
+  message.value = null;
 };
 
 onMounted(() => {
   authStore.checkAuth();
-  isAdmin.value = authStore.isAdmin; // Ensure isAdmin is updated
+  isAdmin.value = authStore.isAdmin;
   fetchTopicDetails();
 });
 </script>
