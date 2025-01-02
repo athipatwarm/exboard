@@ -83,36 +83,6 @@ const deleteTopic = async () => {
   }
 };
 
-const fetchTopicDetails = async () => {
-  const topicName = decodeURIComponent(route.params.topicName);
-  if (!topicName) {
-    message.value = { type: 'error', text: 'Topic title is missing in the URL.' };
-    return;
-  }
-
-  try {
-    isLoading.value = true;
-    const token = localStorage.getItem('token');
-    const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics/${topicName}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    topic.value = response.data;
-
-    const postsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/posts?topicId=${topic.value._id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    topic.value.posts = postsResponse.data; 
-
-    isAdmin.value = useAuthStore().isAdmin;
-  } catch (error) {
-    console.error('Error fetching topic details:', error);
-    message.value = { type: 'error', text: 'Failed to fetch topic details.' };
-  } finally {
-    isLoading.value = false;
-  }
-};
-
 onMounted(() => {
   fetchTopicDetails(); 
 });
