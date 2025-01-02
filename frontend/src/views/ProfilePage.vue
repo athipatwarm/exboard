@@ -7,9 +7,9 @@
       <div class="profile-info">
         <p><strong>Username:</strong> {{ user.username }}</p>
         <button @click="toggleEdit('username')" class="edit-button">
-          {{ isEditingUsername ? 'Cancel' : 'Edit Username' }}
+          {{ isEditing.username ? 'Cancel' : 'Edit Username' }}
         </button>
-        <div v-if="isEditingUsername" class="profile-edit-form">
+        <div v-if="isEditing.username" class="profile-edit-form">
           <div class="input-group">
             <label for="username">Username</label>
             <input
@@ -19,14 +19,14 @@
               placeholder="Enter new username"
             />
           </div>
-          <button @click="updateUsername" class="submit-button">Update Username</button>
+          <button @click="updateField('username', formData.username)" class="submit-button">Update Username</button>
         </div>
 
         <p><strong>Email:</strong> {{ user.email }}</p>
         <button @click="toggleEdit('email')" class="edit-button">
-          {{ isEditingEmail ? 'Cancel' : 'Edit Email' }}
+          {{ isEditing.email ? 'Cancel' : 'Edit Email' }}
         </button>
-        <div v-if="isEditingEmail" class="profile-edit-form">
+        <div v-if="isEditing.email" class="profile-edit-form">
           <div class="input-group">
             <label for="email">Email</label>
             <input
@@ -36,13 +36,13 @@
               placeholder="Enter new email"
             />
           </div>
-          <button @click="updateEmail" class="submit-button">Update Email</button>
+          <button @click="updateField('email', formData.email)" class="submit-button">Update Email</button>
         </div>
 
         <button @click="toggleEdit('password')" class="edit-button">
-          {{ isEditingPassword ? 'Cancel' : 'Change Password' }}
+          {{ isEditing.password ? 'Cancel' : 'Change Password' }}
         </button>
-        <div v-if="isEditingPassword" class="profile-edit-form">
+        <div v-if="isEditing.password" class="profile-edit-form">
           <div class="input-group">
             <label for="password">Current Password</label>
             <input
@@ -61,10 +61,10 @@
               placeholder="Enter new password"
             />
           </div>
-          <button @click="updatePassword" class="submit-button">Update Password</button>
+          <button @click="updateField('password', formData.newPassword)" class="submit-button">Update Password</button>
         </div>
 
-        <button v-if="!isEditingUsername && !isEditingEmail && !isEditingPassword" @click="confirmDelete" class="delete-button">
+        <button v-if="!isEditing.username && !isEditing.email && !isEditing.password" @click="confirmDelete" class="delete-button">
           Delete User
         </button>
       </div>
@@ -92,23 +92,6 @@ import { useRouter } from 'vue-router';
 
 export default {
   name: 'ProfilePage',
-  methods: {
-    toggleEdit(field) {
-      if (field === 'username') {
-        this.isEditingUsername = !this.isEditingUsername;
-        this.isEditingEmail = false;
-        this.isEditingPassword = false;
-      } else if (field === 'email') {
-        this.isEditingEmail = !this.isEditingEmail;
-        this.isEditingUsername = false;
-        this.isEditingPassword = false;
-      } else if (field === 'password') {
-        this.isEditingPassword = !this.isEditingPassword;
-        this.isEditingUsername = false;
-        this.isEditingEmail = false;
-      }
-    },
-  },
   setup() {
     const authStore = useAuthStore();
     const router = useRouter();
@@ -119,9 +102,11 @@ export default {
     const loading = ref(true); 
     const showDeleteModal = ref(false);
 
-    const isEditingUsername = ref(false);
-    const isEditingEmail = ref(false);
-    const isEditingPassword = ref(false);
+    const isEditing = ref({
+      username: false,
+      email: false,
+      password: false,
+    });
 
     if (!authStore.isAuthenticated) {
       router.push('/login'); 
@@ -143,58 +128,22 @@ export default {
       }
     });
 
-    const updateUsername = async () => {
+    const updateField = async (field, value) => {
       errorMessage.value = '';
       successMessage.value = '';
 
-      if (!formData.value.username) {
-        errorMessage.value = 'Username is required.';
+      if (!value) {
+        errorMessage.value = `${field.charAt(0).toUpperCase() + field.slice(1)} is required.`;
         return;
       }
 
-      if (formData.value.username === user.value.username) {
-        errorMessage.value = 'New username cannot be the same as the current username.';
+      const currentValue = user.value[field];
+      if (value === currentValue) {
+        errorMessage.value = `New ${field} cannot be the same as the current ${field}.`;
         return;
       }
 
-      try {
-        const response = await fetch('/api/users/me', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: formData.value.username }),
-          credentials: 'include',
-        });
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Something went wrong.');
-        }
-
-        successMessage.value = 'Username updated successfully!';
-        user.value.username = data.username;
-        formData.value.username = '';
-        isEditingUsername.value = false;
-      } catch (error) {
-        errorMessage.value = error.message || 'Error updating username';
-        console.error(error);
-      }
-    };
-
-    const updateEmail = async () => {
-      errorMessage.value = '';
-      successMessage.value = '';
-
-      if (!formData.value.email) {
-        errorMessage.value = 'Email is required.';
-        return;
-      }
-
-      if (formData.value.email === user.value.email) {
-        errorMessage.value = 'New email cannot be the same as the current email.';
-        return;
-      }
-
-      if (!formData.value.email.includes('@')) {
+      if (field === 'email' && !value.includes('@')) {
         errorMessage.value = 'Invalid email format. Email must contain @.';
         return;
       }
@@ -203,7 +152,7 @@ export default {
         const response = await fetch('/api/users/me', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: formData.value.email }),
+          body: JSON.stringify({ [field]: value }),
           credentials: 'include',
         });
         const data = await response.json();
@@ -212,49 +161,24 @@ export default {
           throw new Error(data.error || 'Something went wrong.');
         }
 
-        successMessage.value = 'Email updated successfully!';
-        user.value.email = data.email;
-        formData.value.email = '';
-        isEditingEmail.value = false;
+        successMessage.value = `${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully!`;
+        user.value[field] = data[field];
+        formData.value[field] = '';
+        isEditing.value[field] = false;
       } catch (error) {
-        errorMessage.value = error.message || 'Error updating email';
+        errorMessage.value = error.message || `Error updating ${field}`;
         console.error(error);
       }
     };
 
-    const updatePassword = async () => {
-      errorMessage.value = '';
-      successMessage.value = '';
-
-      if (!formData.value.password || !formData.value.newPassword) {
-        errorMessage.value = 'Both current and new passwords are required.';
-        return;
-      }
-
-      try {
-        const response = await fetch('/api/users/me', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            password: formData.value.password,
-            newPassword: formData.value.newPassword,
-          }),
-          credentials: 'include',
-        });
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Something went wrong.');
+    const toggleEdit = (field) => {
+      Object.keys(isEditing.value).forEach(key => {
+        if (key === field) {
+          isEditing.value[key] = !isEditing.value[key];
+        } else {
+          isEditing.value[key] = false;
         }
-
-        successMessage.value = 'Password updated successfully!';
-        formData.value.password = '';
-        formData.value.newPassword = '';
-        isEditingPassword.value = false;
-      } catch (error) {
-        errorMessage.value = error.message || 'Error updating password';
-        console.error(error);
-      }
+      });
     };
 
     const confirmDelete = () => {
@@ -289,53 +213,24 @@ export default {
       }
     };
 
-    const toggleEditUsername = () => {
-      isEditingUsername.value = !isEditingUsername.value;
-    };
-
-    const toggleEditEmail = () => {
-      isEditingEmail.value = !isEditingEmail.value;
-    };
-
-    const toggleEditPassword = () => {
-      isEditingPassword.value = !isEditingPassword.value;
-    };
-
-    const cancelEdit = (field) => {
-      if (field === 'username') {
-        isEditingUsername.value = false;
-      } else if (field === 'email') {
-        isEditingEmail.value = false;
-      } else if (field === 'password') {
-        isEditingPassword.value = false;
-      }
-      formData.value = { username: '', email: '', password: '', newPassword: '' };
-    };
-
     return {
       user,
       formData,
       successMessage,
       errorMessage,
       loading,
-      isEditingUsername,
-      isEditingEmail,
-      isEditingPassword,
+      isEditing,
       showDeleteModal,
       confirmDelete,
       cancelDelete,
       deleteUser,
-      toggleEditUsername,
-      toggleEditEmail,
-      toggleEditPassword,
-      updateUsername,
-      updateEmail,
-      updatePassword,
-      cancelEdit,
+      toggleEdit,
+      updateField,
     };
   },
 };
 </script>
+
 
 <style scoped>
 .profile-container {
