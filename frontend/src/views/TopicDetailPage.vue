@@ -20,13 +20,17 @@
 
       <div v-if="topic.posts && topic.posts.length > 0">
         <div v-for="post in topic.posts" :key="post._id" class="post-item">
-          <h3>{{ post.title }}</h3>
-          <p>{{ post.content }}</p>
-          <div class="post-author">
-            Posted by: {{ post.author ? post.author.username : 'Unknown Author' }}
+          <div class="post-header">
+            <h3>{{ post.title }}</h3>
+            <div class="post-author">
+              Posted by: {{ post.author ? post.author.username : 'Unknown Author' }}
+            </div>
           </div>
-          <div class="post-date">
-            Created at: {{ new Date(post.createdAt).toLocaleString() }}
+          <p class="post-content">{{ post.content }}</p>
+          <div class="post-footer">
+            <div class="post-date">
+              Created at: {{ new Date(post.createdAt).toLocaleString() }}
+            </div>
           </div>
         </div>
       </div>
@@ -206,7 +210,7 @@ onMounted(() => {
   justify-content: space-between;
   padding: 20px;
   font-family: Arial, sans-serif;
-  background-color: #f4f4f9;
+  background-color: #f9f9f9;
 }
 
 .topic-info {
@@ -215,27 +219,32 @@ onMounted(() => {
 
 .posts-section {
   width: 65%;
-}
-
-.topic-box {
-  background-color: white;
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
   font-size: 2em;
   margin-bottom: 10px;
+  color: #333;
+}
+
+h2 {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+  color: #333;
 }
 
 .topic-category {
   font-style: italic;
-  color: #555;
+  color: #777;
   margin-top: 10px;
 }
 
-.created-at, .topic-author {
+.created-at,
+.topic-author {
   font-size: 0.9em;
   color: #777;
 }
@@ -250,7 +259,7 @@ h1 {
   background-color: #ff6b6b;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
   font-size: 0.9em;
 }
@@ -261,7 +270,7 @@ h1 {
 
 .loading {
   font-size: 1.5em;
-  color: #777;
+  color: #555;
   text-align: center;
 }
 
@@ -277,23 +286,64 @@ h1 {
 }
 
 .message.error {
-  color: #777;
-  font-style: italic;
+  background-color: #f44336;
+  color: white;
 }
 
 .post-item {
   margin-top: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #ddd;
+  padding: 15px;
+  background-color: #f1f1f1;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
 }
 
-.post-item h3 {
-  font-size: 1.2em;
-  margin-bottom: 10px;
+.post-item:hover {
+  transform: translateY(-5px);
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.post-header h3 {
+  font-size: 1.25em;
+  color: #333;
+  margin: 0;
+}
+
+.post-author {
+  font-size: 0.9em;
+  color: #555;
+}
+
+.post-content {
+  font-size: 1em;
+  margin-top: 10px;
+  color: #444;
+}
+
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: #777;
+}
+
+.post-date {
+  color: #888;
 }
 
 .create-post-form {
   margin-top: 20px;
+  background-color: #fafafa;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .input {
