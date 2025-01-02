@@ -2,10 +2,9 @@ const mongoose = require('mongoose');
 const Post = require('../models/Post');
 const Topic = require('../models/Topic');
 
-// Create a new post
 exports.createPost = async (req, res) => {
   if (!req.user) {
-    console.log("Backend log: User is not logged in.", req.user); // Log the user object to confirm its state
+    console.log("Backend log: User is not logged in.", req.user);
     return res.status(401).send({ error: 'You must be logged in to create a post' });
   }
 
@@ -39,6 +38,10 @@ exports.createPost = async (req, res) => {
 
     await post.save();
 
+    // Ensure that the topic has a 'posts' array and push the post's ID
+    if (!topicExists.posts) {
+      topicExists.posts = [];  // Initialize the posts array if it doesn't exist
+    }
     topicExists.posts.push(post._id);
     await topicExists.save();
 
@@ -47,7 +50,7 @@ exports.createPost = async (req, res) => {
     res.status(201).send(post);
   } catch (error) {
     console.error("Backend log: Error creating post", error);
-    console.error("Backend log: Error details", error.stack); // Log the stack trace for better debugging
+    console.error("Backend log: Error details", error.stack);
     res.status(500).send({ error: 'Failed to create post' });
   }
 };
