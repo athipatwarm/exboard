@@ -1,4 +1,4 @@
-<template> 
+<template>
   <div class="topic-detail">
     <div class="topic-info">
       <div class="topic-box">
@@ -61,7 +61,7 @@ import { useAuthStore } from '../store/auth';
 
 const route = useRoute(); 
 const router = useRouter(); 
-const topic = ref({}); // Store topic details
+const topic = ref({}); 
 const isLoading = ref(false);
 const message = ref(null);
 const isAdmin = ref(false);
@@ -72,7 +72,7 @@ const authStore = useAuthStore();
 
 // Fetch topic details
 const fetchTopicDetails = async () => {
-  const topicName = decodeURIComponent(route.params.topicName); // Retrieve the topic name from the URL
+  const topicName = decodeURIComponent(route.params.topicName); 
   if (!topicName) {
     message.value = { type: 'error', text: 'Topic title is missing in the URL.' };
     return;
@@ -85,25 +85,27 @@ const fetchTopicDetails = async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    topic.value = response.data; // Store the full topic object
+    if (response && response.data) {
+      topic.value = response.data;
+    } else {
+      throw new Error('No data found for this topic.');
+    }
 
-    // Fetch posts related to the topic
     const postsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/posts`, {
       headers: { Authorization: `Bearer ${token}` },
       params: { topic: topic.value._id }
     });
 
-    // Store posts linked to this topic
-    if (postsResponse.data) {
-      topic.value.posts = postsResponse.data; // Link posts to the topic
+    if (postsResponse && postsResponse.data) {
+      topic.value.posts = postsResponse.data;
     } else {
       message.value = { type: 'error', text: 'No posts found for this topic.' };
     }
 
-    isAdmin.value = authStore.isAdmin; // Check if the user is an admin
+    isAdmin.value = authStore.isAdmin;
   } catch (error) {
-    console.error('Error fetching topic details:', error);
-    message.value = { type: 'error', text: 'Failed to fetch topic details.' };
+    console.error(error);
+    message.value = { type: 'error', text: error.message || 'Failed to fetch topic details.' };
   } finally {
     isLoading.value = false;
   }
@@ -148,7 +150,7 @@ const createPost = async () => {
   const postData = {
     title: newPost.value.title,
     content: newPost.value.content,
-    topic: topic.value._id // Send topic ID from fetched topic details
+    topic: topic.value._id
   };
 
   try {
@@ -160,11 +162,11 @@ const createPost = async () => {
 
     if (response.status === 201) {
       message.value = { type: 'success', text: 'Post created successfully!' };
-      fetchTopicDetails(); // Refresh the topic details after post creation
+      fetchTopicDetails();
       cancelCreatePostForm();
     }
   } catch (error) {
-    console.error('Create post error:', error);
+    console.error(error);
     const errorMessage = error.response?.data?.error || 'Failed to create post.';
     message.value = { type: 'error', text: errorMessage };
   } finally {
@@ -182,7 +184,7 @@ const cancelCreatePostForm = () => {
 onMounted(() => {
   authStore.checkAuth();
   isAdmin.value = authStore.isAdmin;
-  fetchTopicDetails(); // Fetch topic details when component is mounted
+  fetchTopicDetails();
 });
 </script>
 

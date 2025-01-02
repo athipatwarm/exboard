@@ -37,4 +37,8 @@ const postSchema = new mongoose.Schema({
   }
 });
 
+postSchema.pre('find', function() {
+  this.populate('author', 'username').populate('reports', 'username');
+});
+
 module.exports = mongoose.model('Post', postSchema);
