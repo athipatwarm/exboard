@@ -22,9 +22,19 @@
       <div v-for="post in topic.posts" :key="post._id" class="post-item">
         <h3>{{ post.title }}</h3>
         <p>{{ post.content }}</p>
-        <div class="post-author">Posted by: {{ post.author.username }}</div>
+        <div class="post-author">
+          Posted by: {{ post.author.username }}
+        </div>
+        <div class="post-date">
+          Created at: {{ new Date(post.createdAt).toLocaleString() }}
+        </div>
+      </div>
+
+      <div v-if="authStore.isAuthenticated" class="post-button-container">
+        <button @click="addPost" class="post-button">Add Post</button>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -41,6 +51,8 @@ const isLoading = ref(false);
 const message = ref(null);
 const isAdmin = ref(false); 
 
+const authStore = useAuthStore();
+
 const fetchTopicDetails = async () => {
   const topicName = decodeURIComponent(route.params.topicName); 
   if (!topicName) {
@@ -56,7 +68,13 @@ const fetchTopicDetails = async () => {
     });
 
     topic.value = response.data;
-    isAdmin.value = useAuthStore().isAdmin;
+    isAdmin.value = authStore.isAdmin;
+    
+    if (topic.value && topic.value.posts) {
+      topic.value.posts = response.data.posts;
+    } else {
+      message.value = { type: 'error', text: 'No posts found for this topic.' };
+    }
   } catch (error) {
     console.error('Error fetching topic details:', error);
     message.value = { type: 'error', text: 'Failed to fetch topic details.' };
@@ -64,6 +82,7 @@ const fetchTopicDetails = async () => {
     isLoading.value = false;
   }
 };
+
 
 const deleteTopic = async () => {
   const topicId = topic.value._id;
@@ -84,6 +103,7 @@ const deleteTopic = async () => {
 };
 
 onMounted(() => {
+  authStore.checkAuth(); 
   fetchTopicDetails(); 
 });
 </script>
