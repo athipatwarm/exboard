@@ -31,7 +31,7 @@
       </div>
 
       <div v-if="authStore.isAuthenticated" class="post-button-container">
-        <button @click="addPost" class="post-button">Add Post</button>
+        <button @click="addPost" class="post-button">Create Post</button>
       </div>
     </div>
 
