@@ -9,7 +9,7 @@
         <button @click="toggleEdit('username')" class="edit-button">
           {{ isEditing.username ? 'Cancel' : 'Edit Username' }}
         </button>
-        <div v-if="isEditing.username" class="profile-edit-form">
+        <div :id="'username-edit-form'" :class="{ 'visible': isEditing.username }" class="profile-edit-form">
           <div class="input-group">
             <label for="username">Username</label>
             <input
@@ -26,7 +26,7 @@
         <button @click="toggleEdit('email')" class="edit-button">
           {{ isEditing.email ? 'Cancel' : 'Edit Email' }}
         </button>
-        <div v-if="isEditing.email" class="profile-edit-form">
+        <div :id="'email-edit-form'" :class="{ 'visible': isEditing.email }" class="profile-edit-form">
           <div class="input-group">
             <label for="email">Email</label>
             <input
@@ -42,7 +42,7 @@
         <button @click="toggleEdit('password')" class="edit-button">
           {{ isEditing.password ? 'Cancel' : 'Change Password' }}
         </button>
-        <div v-if="isEditing.password" class="profile-edit-form">
+        <div :id="'password-edit-form'" :class="{ 'visible': isEditing.password }" class="profile-edit-form">
           <div class="input-group">
             <label for="password">Current Password</label>
             <input
@@ -228,6 +228,7 @@ export default {
 };
 </script>
 
+
 <style scoped>
 .profile-container {
   max-width: 600px;
@@ -274,13 +275,14 @@ h1 {
 }
 
 .profile-edit-form {
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.3s ease-in-out;
+  display: none;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
 }
 
-.profile-edit-form[style*="display: block;"] {
-  max-height: 200px;
+.profile-edit-form.visible {
+  display: block;
+  opacity: 1;
 }
 
 .input-group {
@@ -384,23 +386,5 @@ h1 {
   border-radius: 5px;
   cursor: pointer;
 }
-
-.cancel-button {
-  margin-top: 10px;
-  padding: 8px 15px;
-  font-size: 1rem;
-  border: 2px solid #ccc;
-  color: #333;
-  background-color: transparent;
-  border-radius: 5px;
-  cursor: pointer;
-  display: block;
-  width: 100%;
-}
-
-.cancel-button:hover {
-  background-color: #ccc;
-  color: white;
-}
-
 </style>
+
