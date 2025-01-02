@@ -69,27 +69,3 @@ exports.getPostsByTopic = async (req, res) => {
   }
 };
 
-exports.deletePost = async (req, res) => {
-  const { postId } = req.params;
-  try {
-    const post = await Post.findById(postId);
-    if (!post) {
-      return res.status(404).send({ error: 'Post not found' });
-    }
-    // Check if the user is either the post author or an admin
-    if (req.user._id.toString() !== post.author.toString() && !req.user.isAdmin) {
-      return res.status(403).send({ error: 'You are not authorized to delete this post' });
-    }
-    const topic = await Topic.findById(post.topic);
-    if (topic) {
-      topic.posts.pull(post._id);
-      await topic.save();
-    }
-
-    await post.remove();
-    res.status(200).send({ message: 'Post deleted successfully' });
-  } catch (error) {
-    console.error("Backend log: Error deleting post", error);
-    res.status(500).send({ error: 'Failed to delete post' });
-  }
-};
