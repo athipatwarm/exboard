@@ -2,9 +2,6 @@ const mongoose = require('mongoose');
 const Post = require('../models/Post');
 const Topic = require('../models/Topic');
 
-const Post = require('../models/Post');
-const Topic = require('../models/Topic');
-
 // Create a new post
 exports.createPost = async (req, res) => {
   if (!req.user) {
