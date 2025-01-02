@@ -56,7 +56,7 @@ import { useAuthStore } from '../store/auth';
 
 const route = useRoute(); 
 const router = useRouter(); 
-const topic = ref({});
+const topic = ref({}); // Store topic details
 const isLoading = ref(false);
 const message = ref(null);
 const isAdmin = ref(false);
@@ -65,6 +65,7 @@ const newPost = ref({ title: '', content: '' });
 
 const authStore = useAuthStore();
 
+// Fetch topic details
 const fetchTopicDetails = async () => {
   const topicName = decodeURIComponent(route.params.topicName);
   if (!topicName) {
@@ -79,7 +80,7 @@ const fetchTopicDetails = async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    topic.value = response.data;
+    topic.value = response.data; // Store the full topic object
     isAdmin.value = authStore.isAdmin;
 
     if (topic.value && topic.value.posts) {
@@ -95,6 +96,7 @@ const fetchTopicDetails = async () => {
   }
 };
 
+// Delete topic
 const deleteTopic = async () => {
   const topicId = topic.value._id;
   try {
@@ -113,13 +115,15 @@ const deleteTopic = async () => {
   }
 };
 
+// Toggle create post form visibility
 const toggleCreatePostForm = () => {
   showCreatePostForm.value = !showCreatePostForm.value;
 };
 
+// Create a new post
 const createPost = async () => {
-  if (!newPost.value.title || !newPost.value.content || !newPost.value.topicId) {
-    message.value = { type: 'error', text: 'Title, content, and topic are required.' };
+  if (!newPost.value.title || !newPost.value.content) {
+    message.value = { type: 'error', text: 'Title and content are required.' };
     return;
   }
 
@@ -131,10 +135,8 @@ const createPost = async () => {
   const postData = {
     title: newPost.value.title,
     content: newPost.value.content,
-    topic: newPost.value.topicId 
+    topic: topic.value._id // Send topic ID from fetched topic details
   };
-
-  console.log('Post data:', postData); 
 
   try {
     isLoading.value = true;
@@ -145,7 +147,7 @@ const createPost = async () => {
 
     if (response.status === 201) {
       message.value = { type: 'success', text: 'Post created successfully!' };
-      fetchTopicDetails();
+      fetchTopicDetails(); // Refresh the topic details after post creation
       cancelCreatePostForm();
     }
   } catch (error) {
@@ -157,7 +159,7 @@ const createPost = async () => {
   }
 };
 
-
+// Cancel post creation form
 const cancelCreatePostForm = () => {
   newPost.value = { title: '', content: '' };
   showCreatePostForm.value = false;
@@ -167,7 +169,7 @@ const cancelCreatePostForm = () => {
 onMounted(() => {
   authStore.checkAuth();
   isAdmin.value = authStore.isAdmin;
-  fetchTopicDetails();
+  fetchTopicDetails(); // Fetch topic details when component is mounted
 });
 </script>
 
