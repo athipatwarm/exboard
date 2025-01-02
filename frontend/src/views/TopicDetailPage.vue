@@ -6,9 +6,7 @@
         <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>
         <p>{{ topic.description }}</p>
         <div class="created-at">Created at: {{ new Date(topic.createdAt).toLocaleString() }}</div>
-
         <div v-if="topic.author" class="topic-author">Author: {{ topic.author.username }}</div>
-
         <div v-if="isAdmin" class="delete-button-container">
           <button @click="deleteTopic" class="delete-button">Delete Topic</button>
         </div>
@@ -19,6 +17,7 @@
       <h2>Posts</h2>
       <div v-if="isLoading" class="loading">Loading posts...</div>
       <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
+      
       <div v-for="post in topic.posts" :key="post._id" class="post-item">
         <h3>{{ post.title }}</h3>
         <p>{{ post.content }}</p>
@@ -160,26 +159,28 @@ onMounted(() => {
 
 <style scoped>
 .topic-detail {
+  max-width: 1000px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
 }
 
 .topic-info {
-  width: 25%;
-  padding-right: 20px;
+  width: 30%;
 }
 
 .posts-section {
-  width: 70%;
+  width: 65%;
 }
 
 .topic-box {
-  border: 2px solid #ddd;
+  background-color: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  background-color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
@@ -189,46 +190,43 @@ h1 {
 
 .topic-category {
   font-style: italic;
+  color: #555;
   margin-top: 10px;
 }
 
-.topic-author {
-  font-weight: bold;
-  margin-top: 20px;
-}
-
-.created-at {
+.created-at, .topic-author {
+  font-size: 0.9em;
   color: #777;
-  margin-top: 10px;
 }
 
 .delete-button-container {
-  margin-top: 20px;
   text-align: right;
+  margin-top: 15px;
 }
 
 .delete-button {
-  padding: 10px 20px;
-  background-color: #f44336;
+  padding: 8px 15px;
+  background-color: #ff6b6b;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 0.9em;
 }
 
 .delete-button:hover {
-  background-color: #d32f2f;
+  background-color: #ff4040;
 }
 
 .loading {
   font-size: 1.5em;
-  text-align: center;
   color: #777;
+  text-align: center;
 }
 
 .message {
-  margin-top: 20px;
   padding: 10px;
+  margin-top: 20px;
   text-align: center;
 }
 
@@ -238,25 +236,18 @@ h1 {
 }
 
 .message.error {
-  background-color: #f44336;
   color: white;
 }
 
 .post-item {
   margin-top: 20px;
-  border-bottom: 1px solid #ddd;
   padding-bottom: 15px;
+  border-bottom: 1px solid #ddd;
 }
 
 .post-item h3 {
-  font-size: 1.5em;
+  font-size: 1.2em;
   margin-bottom: 10px;
-}
-
-.post-author {
-  font-size: 0.9em;
-  color: #555;
-  margin-top: 10px;
 }
 
 .create-post-form {
@@ -265,22 +256,23 @@ h1 {
 
 .input {
   width: 100%;
-  padding: 10px;
-  margin: 10px 0;
+  padding: 12px;
+  margin: 8px 0;
   border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
+  border-radius: 5px;
+  font-size: 1em;
 }
 
 .form-actions {
   display: flex;
   justify-content: space-between;
+  margin-top: 15px;
 }
 
 .button {
   padding: 10px 20px;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
 }
 
@@ -291,7 +283,6 @@ h1 {
 
 .submit-button:disabled {
   background-color: #ccc;
-  cursor: not-allowed;
 }
 
 .cancel-button {
@@ -303,4 +294,17 @@ h1 {
   background-color: #d32f2f;
 }
 
+.post-button {
+  display: block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.post-button:hover {
+  background-color: #0056b3;
+}
 </style>
