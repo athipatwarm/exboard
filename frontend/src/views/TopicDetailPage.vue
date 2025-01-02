@@ -137,7 +137,7 @@ const createPost = async () => {
     });
 
     message.value = { type: 'success', text: 'Post created successfully!' };
-    fetchTopicDetails(); // Refresh the topic details to show the new post
+    fetchTopicDetails();
     cancelCreatePostForm();
   } catch (error) {
     message.value = { type: 'error', text: 'Failed to create post.' };
@@ -236,7 +236,8 @@ h1 {
 }
 
 .message.error {
-  color: white;
+  color: #777;
+  font-style: italic;
 }
 
 .post-item {
