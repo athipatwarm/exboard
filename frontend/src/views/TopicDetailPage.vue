@@ -1,5 +1,6 @@
 <template>
   <div class="topic-detail">
+    <!-- Topic Info -->
     <div class="topic-info">
       <div class="topic-box">
         <h1>{{ topic.title }}</h1>
@@ -13,6 +14,7 @@
       </div>
     </div>
 
+    <!-- Posts Section -->
     <div class="posts-section">
       <h2>Posts</h2>
       <div v-if="isLoading" class="loading">Loading posts...</div>
@@ -30,6 +32,10 @@
           <div class="post-footer">
             <div class="post-date">
               Created at: {{ new Date(post.createdAt).toLocaleString() }}
+            </div>
+            <!-- Show delete button if the user is the post author or an admin -->
+            <div v-if="isPostOwnerOrAdmin(post)" class="delete-button-container">
+              <button @click="deletePost(post._id)" class="delete-button">Delete Post</button>
             </div>
           </div>
         </div>
@@ -187,6 +193,33 @@ const createPost = async () => {
   }
 };
 
+const deletePost = async (postId) => {
+  try {
+    isLoading.value = true;
+    const token = localStorage.getItem('token');
+    await axios.delete(`${import.meta.env.VITE_API_URL}/posts/${postId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    message.value = { type: 'success', text: 'Post deleted successfully!' };
+    await fetchTopicDetails(); // Refresh topic and posts after deletion
+  } catch (error) {
+    message.value = { type: 'error', text: 'Failed to delete post.' };
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Check if the current user is the post owner or an admin
+const isPostOwnerOrAdmin = (post) => {
+  return post.author._id === authStore.user._id || authStore.isAdmin;
+};
+
+onMounted(() => {
+  authStore.checkAuth();
+  isAdmin.value = authStore.isAdmin;
+  fetchTopicDetails();
+});
 
 // Cancel post creation form
 const cancelCreatePostForm = () => {
@@ -398,5 +431,24 @@ h2 {
 
 .post-button:hover {
   background-color: #0056b3;
+}
+
+.delete-button-container {
+  text-align: right;
+  margin-top: 15px;
+}
+
+.delete-button {
+  padding: 8px 15px;
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.delete-button:hover {
+  background-color: #ff4040;
 }
 </style>
