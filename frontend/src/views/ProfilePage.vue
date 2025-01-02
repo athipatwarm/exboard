@@ -345,15 +345,15 @@ h1 {
 }
 
 .dot:nth-child(2) {
-  animation-delay: 0.3s;
+  animation-delay: 0.1s;
 }
 
 .dot:nth-child(3) {
-  animation-delay: 0.6s;
+  animation-delay: 0.2s;
 }
 
 .dot:nth-child(4) {
-  animation-delay: 0.9s;
+  animation-delay: 0.3s;
 }
 
 @keyframes dot-blink {
