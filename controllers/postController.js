@@ -34,12 +34,12 @@ exports.createPost = async (req, res) => {
     await post.save();
 
     topicExists.posts.push(post._id);
-    await topicExists.save(); 
+    await topicExists.save();
 
     res.status(201).send(post);
   } catch (error) {
     console.error('Error creating post:', error);
-    res.status(400).send({ error: 'Failed to create post' });
+    res.status(500).send({ error: 'Failed to create post' });
   }
 };
 
@@ -55,5 +55,3 @@ exports.getPostsByTopic = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch posts' });
   }
 };
-
-

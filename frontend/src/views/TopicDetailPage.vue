@@ -23,7 +23,6 @@
           <h3>{{ post.title }}</h3>
           <p>{{ post.content }}</p>
           <div class="post-author">
-            <!-- Check if author is defined before accessing the username -->
             Posted by: {{ post.author ? post.author.username : 'Unknown Author' }}
           </div>
           <div class="post-date">
@@ -92,7 +91,6 @@ const fetchTopicDetails = async () => {
       throw new Error('No data found for this topic.');
     }
 
-    // Update posts fetch URL to use the correct endpoint
     const postsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/posts/${topic.value._id}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -147,6 +145,11 @@ const createPost = async () => {
     return;
   }
 
+  if (!topic.value._id) {
+    message.value = { type: 'error', text: 'Topic ID is invalid.' };
+    return;
+  }
+
   const postData = {
     title: newPost.value.title,
     content: newPost.value.content,
@@ -155,14 +158,6 @@ const createPost = async () => {
 
   try {
     isLoading.value = true;
-
-    const newPostItem = {
-      ...postData,
-      _id: 'temp-id',
-      author: authStore.user, 
-      createdAt: new Date().toISOString(),
-    };
-    topic.value.posts.push(newPostItem); 
 
     const token = localStorage.getItem('token');
     const response = await axios.post(`${import.meta.env.VITE_API_URL}/posts`, postData, {
@@ -174,20 +169,18 @@ const createPost = async () => {
 
       await fetchTopicDetails();
 
-      cancelCreatePostForm(); 
+      cancelCreatePostForm();
     } else {
       throw new Error('Failed to create post.');
     }
   } catch (error) {
     console.error(error);
-    topic.value.posts = topic.value.posts.filter(post => post._id !== 'temp-id');
     const errorMessage = error.response?.data?.error || 'Failed to create post.';
     message.value = { type: 'error', text: errorMessage };
   } finally {
     isLoading.value = false;
   }
 };
-
 
 // Cancel post creation form
 const cancelCreatePostForm = () => {
