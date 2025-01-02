@@ -111,10 +111,6 @@ export default {
       password: false,
     });
 
-    if (!authStore.isAuthenticated) {
-      router.push('/login'); 
-    }
-
     onMounted(async () => {
       try {
         const response = await fetch('/api/users/me', { method: 'GET', credentials: 'include' });
@@ -135,7 +131,7 @@ export default {
       errorMessage.value = '';
       successMessage.value = '';
 
-      if (!value) {
+      if (value == null || value === '') {
         errorMessage.value = `${field.charAt(0).toUpperCase() + field.slice(1)} is required.`;
         return;
       }
@@ -146,9 +142,12 @@ export default {
         return;
       }
 
-      if (field === 'email' && !value.includes('@')) {
-        errorMessage.value = 'Invalid email format. Email must contain @.';
-        return;
+      if (field === 'email') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          errorMessage.value = 'Invalid email format. Please enter a valid email address.';
+          return;
+        }
       }
 
       try {
@@ -158,10 +157,11 @@ export default {
           body: JSON.stringify({ [field]: value }),
           credentials: 'include',
         });
+
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || 'Something went wrong.');
+          throw new Error(data.error || 'Something went wrong while updating the field.');
         }
 
         successMessage.value = `${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully!`;
@@ -169,15 +169,16 @@ export default {
         formData.value[field] = '';
         isEditing.value[field] = false;
       } catch (error) {
+
         errorMessage.value = error.message || `Error updating ${field}`;
-        console.error(error);
+        console.error(`Failed to update ${field}:`, error);
       }
     };
 
     const toggleEdit = (field) => {
       isEditing.value[field] = !isEditing.value[field];
       if (isEditing.value[field]) {
-        formData.value[field] = user.value[field]; // Populate form data when editing starts
+        formData.value[field] = user.value[field];
       }
     };
 
