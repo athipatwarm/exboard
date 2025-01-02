@@ -123,6 +123,11 @@ const createPost = async () => {
     return;
   }
 
+  if (newPost.value.title.length < 5) {
+    message.value = { type: 'error', text: 'Title must be at least 5 characters long.' };
+    return;
+  }
+
   try {
     isLoading.value = true;
     const token = localStorage.getItem('token');
@@ -132,15 +137,19 @@ const createPost = async () => {
       topicId: topic.value._id,
     };
 
-    await axios.post(`${import.meta.env.VITE_API_URL}/posts`, postData, {
+    const response = await axios.post(`${import.meta.env.VITE_API_URL}/posts`, postData, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    message.value = { type: 'success', text: 'Post created successfully!' };
-    fetchTopicDetails();
-    cancelCreatePostForm();
+    if (response.status === 201) {
+      message.value = { type: 'success', text: 'Post created successfully!' };
+      fetchTopicDetails();
+      cancelCreatePostForm();
+    }
   } catch (error) {
-    message.value = { type: 'error', text: 'Failed to create post.' };
+    console.error('Create post error:', error);
+    const errorMessage = error.response?.data?.error || 'Failed to create post.';
+    message.value = { type: 'error', text: errorMessage };
   } finally {
     isLoading.value = false;
   }
@@ -149,10 +158,12 @@ const createPost = async () => {
 const cancelCreatePostForm = () => {
   newPost.value = { title: '', content: '' };
   showCreatePostForm.value = false;
+  message.value = null; // Reset message when canceling
 };
 
 onMounted(() => {
   authStore.checkAuth();
+  isAdmin.value = authStore.isAdmin; // Ensure isAdmin is updated
   fetchTopicDetails();
 });
 </script>
