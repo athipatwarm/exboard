@@ -34,6 +34,7 @@
       </form>
     </div>
 
+    <!-- Posts section (on the right side of the page) -->
     <div class="posts-section">
       <h2>Posts</h2>
       <div v-if="isLoading" class="loading">Loading posts...</div>
@@ -55,15 +56,15 @@ import { useAuthStore } from '../store/auth';
 
 const route = useRoute(); 
 const router = useRouter(); 
-const topic = ref({});
+const topic = ref({ posts: [] }); // Ensure the posts array is initialized
 const isLoading = ref(false);
 const message = ref(null);
 const isAdmin = ref(false);
-const isAuthenticated = ref(false); // Track if the user is authenticated
-const showPostForm = ref(false); // Toggle visibility of the post creation form
-const newPost = ref({ title: '', content: '' }); // New post data
+const isAuthenticated = ref(false);
+const showPostForm = ref(false); 
+const newPost = ref({ title: '', content: '' });
 
-// Fetch topic details
+// Fetch topic details and associated posts
 const fetchTopicDetails = async () => {
   const topicName = decodeURIComponent(route.params.topicName); 
   if (!topicName) {
@@ -80,37 +81,13 @@ const fetchTopicDetails = async () => {
 
     topic.value = response.data;
     isAdmin.value = useAuthStore().isAdmin;
-    isAuthenticated.value = !!token; // Check if the user is authenticated
+    isAuthenticated.value = !!token;
   } catch (error) {
     console.error('Error fetching topic details:', error);
     message.value = { type: 'error', text: 'Failed to fetch topic details.' };
   } finally {
     isLoading.value = false;
   }
-};
-
-// Delete Topic
-const deleteTopic = async () => {
-  const topicId = topic.value._id;
-  try {
-    isLoading.value = true;
-    const token = localStorage.getItem('token');
-    await axios.delete(`${import.meta.env.VITE_API_URL}/topics/${topicId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    message.value = { type: 'success', text: 'Topic deleted successfully!' };
-    router.push('/topics');
-  } catch (error) {
-    message.value = { type: 'error', text: 'Failed to delete topic.' };
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-// Toggle Post Form visibility
-const togglePostForm = () => {
-  showPostForm.value = !showPostForm.value;
 };
 
 // Create a new post
@@ -127,9 +104,9 @@ const createPost = async () => {
     });
 
     message.value = { type: 'success', text: 'Post created successfully!' };
-    topic.value.posts.push(response.data); // Update the list of posts
-    newPost.value = { title: '', content: '' }; // Reset the form
-    showPostForm.value = false; // Hide the form after submission
+    topic.value.posts.push(response.data);
+    newPost.value = { title: '', content: '' }; 
+    showPostForm.value = false; 
   } catch (error) {
     message.value = { type: 'error', text: 'Failed to create post.' };
   }

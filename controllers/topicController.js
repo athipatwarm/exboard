@@ -41,15 +41,19 @@ exports.getAllTopics = async (req, res) => {
   }
 };
 
-// Get topic by name
+// Get topic by name (already included posts)
 exports.getTopicByName = async (req, res) => {
   const { topicName } = req.params;
 
   try {
     const topic = await Topic.findOne({ title: topicName })
       .populate('category', 'name')
-      .populate('author', 'name')
-      .populate('moderators', 'name');
+      .populate('author', 'username') 
+      .populate('moderators', 'name')
+      .populate({
+        path: 'posts', 
+        populate: { path: 'author', select: 'username' } 
+      });
     
     if (!topic) {
       return res.status(404).json({ error: 'Topic not found.' });
@@ -59,6 +63,7 @@ exports.getTopicByName = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch topic.', details: error.message });
   }
 };
+
 
 // Update a topic
 exports.updateTopic = async (req, res) => {
