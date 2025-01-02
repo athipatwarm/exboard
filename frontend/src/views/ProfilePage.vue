@@ -118,6 +118,11 @@ export default {
         return;
       }
 
+      if (formData.value.username === user.value.username) {
+        errorMessage.value = 'New username cannot be the same as the current username.';
+        return;
+      }
+
       try {
         const response = await fetch('/api/users/me', {
           method: 'PATCH',
@@ -147,6 +152,16 @@ export default {
 
       if (!formData.value.email) {
         errorMessage.value = 'Email is required.';
+        return;
+      }
+
+      if (formData.value.email === user.value.email) {
+        errorMessage.value = 'New email cannot be the same as the current email.';
+        return;
+      }
+
+      if (!formData.value.email.includes('@')) {
+        errorMessage.value = 'Invalid email format. Email must contain @.';
         return;
       }
 

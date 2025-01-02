@@ -147,14 +147,31 @@ exports.updateProfile = async (req, res) => {
 
     if (!user) return res.status(404).json({ error: 'User not found.' });
 
-    if (username) user.username = username;
-    if (email) user.email = email;
+    // Validate username
+    if (username) {
+      if (username === user.username) {
+        return res.status(400).json({ error: 'New username cannot be the same as the current username.' });
+      }
+      user.username = username;
+    }
 
+    // Validate email
+    if (email) {
+      if (email === user.email) {
+        return res.status(400).json({ error: 'New email cannot be the same as the current email.' });
+      }
+      if (!email.includes('@')) {
+        return res.status(400).json({ error: 'Invalid email format. Email must contain @.' });
+      }
+      user.email = email;
+    }
+
+    // Validate password change
     if (password && newPassword) {
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) return res.status(400).json({ error: 'Current password is incorrect.' });
 
-      user.password = newPassword; 
+      user.password = newPassword;
     }
 
     await user.save();
@@ -164,6 +181,7 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ error: 'An error occurred while updating the profile.' });
   }
 };
+
 
 
 // Logout a user from all devices (force logout from all other sessions)
