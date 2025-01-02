@@ -102,31 +102,49 @@ exports.registerUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log(`Login attempt for email: ${email}`);
+
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).send({ error: 'Invalid login credentials' });
-    }
-    const isMatch = await user.checkPassword(password);
-    if (!isMatch) {
+      console.log(`Login failed: User with email ${email} not found`);
       return res.status(400).send({ error: 'Invalid login credentials' });
     }
 
-    // Generate a new token
+    console.log(`Stored encoded password for email ${email}: ${user.password}`);
+
+    // Decode password (only if you have the functionality for debugging purposes)
+    const decodedPassword = "Decoded value here"; // Replace with actual decoding logic if available
+    console.log(`Decoded password for email ${email}: ${decodedPassword}`);
+
+    console.log(`Password provided by user: ${password}`);
+
+    const isMatch = await user.checkPassword(password);
+    console.log(`Password comparison result for email ${email}: ${isMatch}`);
+
+    if (!isMatch) {
+      console.log(`Login failed: Incorrect password for email ${email}`);
+      return res.status(400).send({ error: 'Invalid login credentials' });
+    }
+
     const token = await user.generateAuthToken();
 
-    // Set token in cookie
     res.cookie('token', token, {
-      httpOnly: true,       // Helps prevent XSS attacks
-      secure: process.env.NODE_ENV === 'production', // Only set cookies over HTTPS in production
-      sameSite: 'Strict',   // Helps prevent CSRF attacks
-      maxAge: 15 * 60 * 1000  // Token expires in 15 minutes
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+      maxAge: 15 * 60 * 1000
     });
 
+    console.log(`Login successful for email: ${email}`);
     res.send({ user });
   } catch (error) {
-    res.status(400).send(error);
+    console.error(`Error during login for email ${req.body.email}:`, error);
+    res.status(500).send({ error: 'An error occurred during login' });
+  } finally {
+    console.log(`Temporary debugging logs for email ${email} completed.`);
   }
 };
+
 
 exports.getUserProfile = async (req, res) => {
   try {
