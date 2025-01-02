@@ -131,7 +131,44 @@ export default {
       errorMessage.value = '';
       successMessage.value = '';
 
-      if (value == null || value === '') {
+      if (field === 'password') {
+        const { password, newPassword } = formData.value;
+
+        if (!password || !newPassword) {
+          errorMessage.value = 'Both current and new passwords are required.';
+          return;
+        }
+
+        if (password === newPassword) {
+          errorMessage.value = 'New password cannot be the same as the current password.';
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/users/me', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password, newPassword }),
+            credentials: 'include',
+          });
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Something went wrong.');
+          }
+
+          successMessage.value = 'Password updated successfully!';
+          formData.value.password = '';
+          formData.value.newPassword = '';
+          isEditing.value.password = false;
+        } catch (error) {
+          errorMessage.value = error.message || 'Error updating password';
+          console.error(error);
+        }
+        return; 
+      }
+
+      if (!value) {
         errorMessage.value = `${field.charAt(0).toUpperCase() + field.slice(1)} is required.`;
         return;
       }
@@ -161,7 +198,7 @@ export default {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || 'Something went wrong while updating the field.');
+          throw new Error(data.error || 'Something went wrong.');
         }
 
         successMessage.value = `${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully!`;
@@ -169,9 +206,8 @@ export default {
         formData.value[field] = '';
         isEditing.value[field] = false;
       } catch (error) {
-
         errorMessage.value = error.message || `Error updating ${field}`;
-        console.error(`Failed to update ${field}:`, error);
+        console.error(error);
       }
     };
 
