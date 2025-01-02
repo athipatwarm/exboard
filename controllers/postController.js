@@ -2,25 +2,28 @@ const mongoose = require('mongoose');
 const Post = require('../models/Post');
 const Topic = require('../models/Topic');
 
-// Create a new post
 exports.createPost = async (req, res) => {
   if (!req.user) {
+    console.log("Backend log: User is not logged in.");
     return res.status(401).send({ error: 'You must be logged in to create a post' });
   }
 
   const { title, content, topic } = req.body;
 
   if (!title || !content || !topic) {
+    console.log("Backend log: Missing required fields");
     return res.status(400).send({ error: 'Title, content, and topic are required' });
   }
 
   if (!mongoose.Types.ObjectId.isValid(topic)) {
+    console.log("Backend log: Invalid topic ID", topic);
     return res.status(400).send({ error: 'Invalid topic ID' });
   }
 
   try {
     const topicExists = await Topic.findById(topic);
     if (!topicExists) {
+      console.log("Backend log: Topic not found", topic);
       return res.status(404).send({ error: 'Topic not found' });
     }
 
@@ -31,14 +34,18 @@ exports.createPost = async (req, res) => {
       author: req.user._id
     });
 
+    console.log("Backend log: Saving new post", post);
+
     await post.save();
 
     topicExists.posts.push(post._id);
     await topicExists.save();
 
+    console.log("Backend log: Post created successfully", post);
+
     res.status(201).send(post);
   } catch (error) {
-    console.error('Error creating post:', error);
+    console.error("Backend log: Error creating post", error);
     res.status(500).send({ error: 'Failed to create post' });
   }
 };
