@@ -6,35 +6,15 @@
         <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>
         <p>{{ topic.description }}</p>
         <div class="created-at">Created at: {{ new Date(topic.createdAt).toLocaleString() }}</div>
+
         <div v-if="topic.author" class="topic-author">Author: {{ topic.author.username }}</div>
 
-        <!-- Delete Topic button visible only for admins -->
         <div v-if="isAdmin" class="delete-button-container">
           <button @click="deleteTopic" class="delete-button">Delete Topic</button>
-        </div>
-
-        <!-- Create Post button visible only to authenticated users -->
-        <div v-if="isAuthenticated" class="create-post-button-container">
-          <button @click="togglePostForm" class="create-post-button">Create Post</button>
         </div>
       </div>
     </div>
 
-    <!-- Form to create a new post -->
-    <div v-if="showPostForm" class="post-form-container">
-      <h3>Create a Post</h3>
-      <form @submit.prevent="createPost">
-        <label for="postTitle">Title:</label>
-        <input type="text" id="postTitle" v-model="newPost.title" required />
-
-        <label for="postContent">Content:</label>
-        <textarea id="postContent" v-model="newPost.content" required></textarea>
-
-        <button type="submit" class="submit-button">Submit</button>
-      </form>
-    </div>
-
-    <!-- Posts section (on the right side of the page) -->
     <div class="posts-section">
       <h2>Posts</h2>
       <div v-if="isLoading" class="loading">Loading posts...</div>
@@ -56,15 +36,11 @@ import { useAuthStore } from '../store/auth';
 
 const route = useRoute(); 
 const router = useRouter(); 
-const topic = ref({ posts: [] }); // Ensure the posts array is initialized
+const topic = ref({});
 const isLoading = ref(false);
 const message = ref(null);
-const isAdmin = ref(false);
-const isAuthenticated = ref(false);
-const showPostForm = ref(false); 
-const newPost = ref({ title: '', content: '' });
+const isAdmin = ref(false); 
 
-// Fetch topic details and associated posts
 const fetchTopicDetails = async () => {
   const topicName = decodeURIComponent(route.params.topicName); 
   if (!topicName) {
@@ -81,7 +57,6 @@ const fetchTopicDetails = async () => {
 
     topic.value = response.data;
     isAdmin.value = useAuthStore().isAdmin;
-    isAuthenticated.value = !!token;
   } catch (error) {
     console.error('Error fetching topic details:', error);
     message.value = { type: 'error', text: 'Failed to fetch topic details.' };
@@ -90,30 +65,26 @@ const fetchTopicDetails = async () => {
   }
 };
 
-// Create a new post
-const createPost = async () => {
-  const token = localStorage.getItem('token');
+const deleteTopic = async () => {
   const topicId = topic.value._id;
   try {
-    const response = await axios.post(`${import.meta.env.VITE_API_URL}/posts`, {
-      title: newPost.value.title,
-      content: newPost.value.content,
-      topic: topicId,
-    }, {
+    isLoading.value = true;
+    const token = localStorage.getItem('token');
+    await axios.delete(`${import.meta.env.VITE_API_URL}/topics/${topicId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    message.value = { type: 'success', text: 'Post created successfully!' };
-    topic.value.posts.push(response.data);
-    newPost.value = { title: '', content: '' }; 
-    showPostForm.value = false; 
+    message.value = { type: 'success', text: 'Topic deleted successfully!' };
+    router.push('/topics'); 
   } catch (error) {
-    message.value = { type: 'error', text: 'Failed to create post.' };
+    message.value = { type: 'error', text: 'Failed to delete topic.' };
+  } finally {
+    isLoading.value = false;
   }
 };
 
 onMounted(() => {
-  fetchTopicDetails();
+  fetchTopicDetails(); 
 });
 </script>
 
@@ -179,58 +150,6 @@ h1 {
   background-color: #d32f2f;
 }
 
-.create-post-button-container {
-  margin-top: 20px;
-  text-align: right;
-}
-
-.create-post-button {
-  padding: 10px 20px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.create-post-button:hover {
-  background-color: #45a049;
-}
-
-.post-form-container {
-  margin-top: 20px;
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.post-form-container form {
-  display: flex;
-  flex-direction: column;
-}
-
-.post-form-container input,
-.post-form-container textarea {
-  margin-bottom: 15px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.submit-button {
-  padding: 10px 20px;
-  background-color: #2196f3;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.submit-button:hover {
-  background-color: #1976d2;
-}
-
 .loading {
   font-size: 1.5em;
   text-align: center;
@@ -269,4 +188,5 @@ h1 {
   color: #555;
   margin-top: 10px;
 }
+
 </style>
