@@ -17,6 +17,16 @@
     <!-- Posts Section -->
     <div class="posts-section">
       <h2>Posts</h2>
+
+      <!-- Dropdown for Sorting -->
+      <div class="sorting-dropdown">
+        <select v-model="sortOption" @change="sortPosts">
+          <option value="az">A-Z</option>
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
+        </select>
+      </div>
+
       <div v-if="isLoading" class="loading">Loading posts...</div>
       <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
 
@@ -33,7 +43,6 @@
             <div class="post-date">
               Created at: {{ new Date(post.createdAt).toLocaleString() }}
             </div>
-            
           </div>
         </div>
       </div>
@@ -74,6 +83,7 @@ const message = ref(null);
 const isAdmin = ref(false);
 const showCreatePostForm = ref(false);
 const newPost = ref({ title: '', content: '' });
+const sortOption = ref('az');  // Default sorting option is A-Z
 
 const authStore = useAuthStore();
 
@@ -104,6 +114,7 @@ const fetchTopicDetails = async () => {
 
     if (postsResponse && postsResponse.data) {
       topic.value.posts = postsResponse.data;
+      sortPosts();  // Ensure posts are sorted when fetched
     } else {
       message.value = { type: 'error', text: 'No posts found for this topic.' };
     }
@@ -117,7 +128,25 @@ const fetchTopicDetails = async () => {
   }
 };
 
-// Delete topic
+// Sort posts based on the selected option
+const sortPosts = () => {
+  if (!topic.value.posts) return;
+
+  switch (sortOption.value) {
+    case 'az':
+      topic.value.posts.sort((a, b) => a.title.localeCompare(b.title)); // A-Z by title
+      break;
+    case 'newest':
+      topic.value.posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Newest first
+      break;
+    case 'oldest':
+      topic.value.posts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // Oldest first
+      break;
+    default:
+      break;
+  }
+};
+
 const deleteTopic = async () => {
   const topicId = topic.value._id;
   try {
@@ -401,4 +430,16 @@ h2 {
 .post-button:hover {
   background-color: #0056b3;
 }
+
+.sorting-dropdown {
+  margin-bottom: 20px;
+}
+
+.sorting-dropdown select {
+  padding: 8px 12px;
+  font-size: 1em;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
 </style>
+
