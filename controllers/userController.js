@@ -102,49 +102,31 @@ exports.registerUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(`Login attempt for email: ${email}`);
-
     const user = await User.findOne({ email });
     if (!user) {
-      console.log(`Login failed: User with email ${email} not found`);
       return res.status(400).send({ error: 'Invalid login credentials' });
     }
-
-    console.log(`Stored encoded password for email ${email}: ${user.password}`);
-
-    // Decode password (only if you have the functionality for debugging purposes)
-    const decodedPassword = "Decoded value here"; // Replace with actual decoding logic if available
-    console.log(`Decoded password for email ${email}: ${decodedPassword}`);
-
-    console.log(`Password provided by user: ${password}`);
-
     const isMatch = await user.checkPassword(password);
-    console.log(`Password comparison result for email ${email}: ${isMatch}`);
-
     if (!isMatch) {
-      console.log(`Login failed: Incorrect password for email ${email}`);
       return res.status(400).send({ error: 'Invalid login credentials' });
     }
 
+    // Generate a new token
     const token = await user.generateAuthToken();
 
+    // Set token in cookie
     res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Strict',
-      maxAge: 15 * 60 * 1000
+      httpOnly: true,       // Helps prevent XSS attacks
+      secure: process.env.NODE_ENV === 'production', // Only set cookies over HTTPS in production
+      sameSite: 'Strict',   // Helps prevent CSRF attacks
+      maxAge: 15 * 60 * 1000  // Token expires in 15 minutes
     });
 
-    console.log(`Login successful for email: ${email}`);
     res.send({ user });
   } catch (error) {
-    console.error(`Error during login for email ${req.body.email}:`, error);
-    res.status(500).send({ error: 'An error occurred during login' });
-  } finally {
-    console.log(`Temporary debugging logs for email ${email} completed.`);
+    res.status(400).send(error);
   }
 };
-
 
 exports.getUserProfile = async (req, res) => {
   try {
@@ -163,41 +145,22 @@ exports.updateProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
 
-    if (!user) {
-      console.error('User not found');
-      return res.status(404).json({ error: 'User not found.' });
-    }
+    if (!user) return res.status(404).json({ error: 'User not found.' });
 
     if (username) user.username = username;
     if (email) user.email = email;
 
     if (password && newPassword) {
-      console.log(`Attempting to update password for user ${user.email}`);
-      console.log(`Old Password (provided): ${password}`);
-      console.log(`New Password (provided): ${newPassword}`);
-
-      // Verify current password
       const isMatch = await bcrypt.compare(password, user.password);
-      console.log(`Encoded Old Password (DB): ${user.password}`);
-      console.log(`Decoded Old Password Match: ${isMatch}`);
+      if (!isMatch) return res.status(400).json({ error: 'Current password is incorrect.' });
 
-      if (!isMatch) {
-        console.error('Current password is incorrect');
-        return res.status(400).json({ error: 'Current password is incorrect.' });
-      }
-
-      // Hash and save new password
-      const encodedNewPassword = await bcrypt.hash(newPassword, 10);
-      user.password = encodedNewPassword;
-      console.log(`Encoded New Password (DB): ${encodedNewPassword}`);
+      user.password = newPassword; 
     }
 
     await user.save();
     res.json({ username: user.username, email: user.email });
-
-    console.log('Profile updated successfully');
   } catch (err) {
-    console.error('Error updating profile:', err);
+    console.error(err);
     res.status(500).json({ error: 'An error occurred while updating the profile.' });
   }
 };
