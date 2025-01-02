@@ -3,7 +3,7 @@
     <h1>Profile Page</h1>
 
     <div v-if="loading" class="loading-message">
-      Loading<span class="dot">.</span><span class="dot">o</span><span class="dot">0</span><span class="dot">.</span>
+      Loading<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
     </div>
 
     <div v-else>
@@ -361,6 +361,7 @@ h1 {
     opacity: 0;
   }
 }
+
 
 .delete-button {
   margin-top: 20px;
