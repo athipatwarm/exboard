@@ -1,8 +1,11 @@
+const mongoose = require('mongoose');
 const Post = require('../models/Post');
 const Topic = require('../models/Topic');
 
 // Create a new post
 exports.createPost = async (req, res) => {
+  console.log('Request body:', req.body);  
+
   if (!req.user) {
     return res.status(401).send({ error: 'You must be logged in to create a post' });
   }
@@ -13,11 +16,16 @@ exports.createPost = async (req, res) => {
     return res.status(400).send({ error: 'Title, content, and topic are required' });
   }
 
+  if (!mongoose.Types.ObjectId.isValid(topic)) {
+    return res.status(400).send({ error: 'Invalid topic ID' });
+  }
+
   try {
     const topicExists = await Topic.findById(topic);
     if (!topicExists) {
       return res.status(404).send({ error: 'Topic not found' });
     }
+
     const post = new Post({
       title,
       content,

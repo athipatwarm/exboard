@@ -118,7 +118,7 @@ const toggleCreatePostForm = () => {
 };
 
 const createPost = async () => {
-  if (!newPost.value.title || !newPost.value.content || !topic.value._id) {
+  if (!newPost.value.title || !newPost.value.content || !newPost.value.topicId) {
     message.value = { type: 'error', text: 'Title, content, and topic are required.' };
     return;
   }
@@ -128,15 +128,17 @@ const createPost = async () => {
     return;
   }
 
+  const postData = {
+    title: newPost.value.title,
+    content: newPost.value.content,
+    topic: newPost.value.topicId 
+  };
+
+  console.log('Post data:', postData); 
+
   try {
     isLoading.value = true;
     const token = localStorage.getItem('token');
-    const postData = {
-      title: newPost.value.title,
-      content: newPost.value.content,
-      topicId: topic.value._id,
-    };
-
     const response = await axios.post(`${import.meta.env.VITE_API_URL}/posts`, postData, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -154,6 +156,7 @@ const createPost = async () => {
     isLoading.value = false;
   }
 };
+
 
 const cancelCreatePostForm = () => {
   newPost.value = { title: '', content: '' };
