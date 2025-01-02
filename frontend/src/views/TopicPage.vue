@@ -1,160 +1,126 @@
 <template>
-  <div class="topic-detail">
-    <div class="topic-info">
-      <div class="topic-box">
-        <h1>{{ topic.title }}</h1>
-        <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>
-        <p>{{ topic.description }}</p>
-        <div class="created-at">Created at: {{ new Date(topic.createdAt).toLocaleString() }}</div>
+  <div class="topic-page">
+    <h1>Topics</h1>
 
-        <div v-if="topic.author" class="topic-author">Author: {{ topic.author.username }}</div>
+    <button v-if="authStore.isAuthenticated && authStore.isAdmin" @click="toggleCreateForm" class="create-button">
+      Create Topic
+    </button>
 
-        <div v-if="isAdmin" class="delete-button-container">
-          <button @click="deleteTopic" class="delete-button">Delete Topic</button>
+    <div v-if="showCreateForm" class="create-form">
+      <form @submit.prevent="createTopic">
+        <input type="text" v-model="newTopic.title" placeholder="Title" required class="input" />
+        <textarea v-model="newTopic.description" placeholder="Description" required class="input"></textarea>
+
+        <div class="form-actions">
+          <button type="submit" :disabled="isLoading" class="button submit-button">Create</button>
+          <button type="button" @click="cancelCreateForm" class="button cancel-button">Cancel</button>
         </div>
-      </div>
+      </form>
     </div>
 
-    <div class="posts-section">
-      <h2>Posts</h2>
-      <div v-if="isLoading" class="loading">Loading posts...</div>
-      <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
-      <div v-for="post in topic.posts" :key="post._id" class="post-item">
-        <h3>{{ post.title }}</h3>
-        <p>{{ post.content }}</p>
-        <div class="post-author">
-          Posted by: {{ post.author.username }}
-        </div>
-        <div class="post-date">
-          Created at: {{ new Date(post.createdAt).toLocaleString() }}
-        </div>
-      </div>
-
-      <div v-if="authStore.isAuthenticated" class="post-button-container">
-        <button @click="toggleCreatePostForm" class="post-button">Create Post</button>
-      </div>
-
-      <div v-if="showCreatePostForm" class="create-post-form">
-        <form @submit.prevent="createPost">
-          <input type="text" v-model="newPost.title" placeholder="Title" required class="input" />
-          <textarea v-model="newPost.content" placeholder="Content" required class="input"></textarea>
-
-          <div class="form-actions">
-            <button type="submit" :disabled="isLoading" class="button submit-button">Create</button>
-            <button type="button" @click="cancelCreatePostForm" class="button cancel-button">Cancel</button>
-          </div>
-        </form>
+    <div v-if="topics.length" class="topic-list">
+      <div v-for="topic in topics" :key="topic._id" class="topic-box">
+        <router-link :to="`/topic/${encodeURIComponent(topic.title)}`" class="topic-link">
+          <div class="topic-title">{{ topic.title }}</div>
+          <div class="topic-description">{{ topic.description }}</div>
+          <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>
+          <div v-if="topic.author" class="topic-author">Author: {{ topic.author.name }}</div>
+        </router-link>
       </div>
     </div>
+    <div v-else class="empty-list">No topics available. Please create one.</div>
+
+    <div v-if="isLoading" class="loading">Loading...</div>
+    <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '../store/auth';
 
-const route = useRoute(); 
-const router = useRouter(); 
-const topic = ref({});
+const authStore = useAuthStore();
+const topics = ref([]);
+const showCreateForm = ref(false);
+const newTopic = ref({
+  title: '',
+  description: '',
+});
 const isLoading = ref(false);
 const message = ref(null);
-const isAdmin = ref(false);
-const showCreatePostForm = ref(false);
-const newPost = ref({ title: '', content: '' });
 
-const authStore = useAuthStore();
+const toggleCreateForm = () => {
+  showCreateForm.value = !showCreateForm.value;
+};
 
-const fetchTopicDetails = async () => {
-  const topicName = decodeURIComponent(route.params.topicName);
-  if (!topicName) {
-    message.value = { type: 'error', text: 'Topic title is missing in the URL.' };
-    return;
-  }
-
+const fetchTopics = async () => {
   try {
     isLoading.value = true;
-    const token = localStorage.getItem('token');
-    const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics/${topicName}`, {
+    const token = localStorage.getItem('token') || authStore.getCookie('token');
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-
-    topic.value = response.data;
-    isAdmin.value = authStore.isAdmin;
-
-    if (topic.value && topic.value.posts) {
-      topic.value.posts = response.data.posts;
-    } else {
-      message.value = { type: 'error', text: 'No posts found for this topic.' };
-    }
+    topics.value = response.data;
   } catch (error) {
-    console.error('Error fetching topic details:', error);
-    message.value = { type: 'error', text: 'Failed to fetch topic details.' };
+    console.error('Error fetching topics:', error);
+    message.value = { type: 'error', text: 'Failed to fetch topics.' };
   } finally {
     isLoading.value = false;
   }
 };
 
-const deleteTopic = async () => {
-  const topicId = topic.value._id;
-  try {
-    isLoading.value = true;
-    const token = localStorage.getItem('token');
-    await axios.delete(`${import.meta.env.VITE_API_URL}/topics/${topicId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    message.value = { type: 'success', text: 'Topic deleted successfully!' };
-    router.push('/topics');
-  } catch (error) {
-    message.value = { type: 'error', text: 'Failed to delete topic.' };
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const toggleCreatePostForm = () => {
-  showCreatePostForm.value = !showCreatePostForm.value;
-};
-
-const createPost = async () => {
-  if (!newPost.value.title || !newPost.value.content) {
-    message.value = { type: 'error', text: 'Title and content are required.' };
+const createTopic = async () => {
+  if (!newTopic.value.title || !newTopic.value.description) {
+    message.value = { type: 'error', text: 'Title and description are required.' };
     return;
   }
 
   try {
     isLoading.value = true;
-    const token = localStorage.getItem('token');
-    const postData = {
-      title: newPost.value.title,
-      content: newPost.value.content,
-      topicId: topic.value._id,
+
+    const token = localStorage.getItem('token') || authStore.getCookie('token');
+    const user = authStore.user; 
+
+    const topicData = {
+      title: newTopic.value.title,
+      description: newTopic.value.description,
+      author: user._id,
+      moderators: newTopic.value.moderators || [],
     };
 
-    await axios.post(`${import.meta.env.VITE_API_URL}/posts`, postData, {
+    await axios.post(`${import.meta.env.VITE_API_URL}/topics`, topicData, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    message.value = { type: 'success', text: 'Post created successfully!' };
-    fetchTopicDetails();
-    cancelCreatePostForm();
+    message.value = { type: 'success', text: 'Topic created successfully!' };
+    fetchTopics(); 
+    resetCreateForm();
   } catch (error) {
-    message.value = { type: 'error', text: 'Failed to create post.' };
+    handleError("Failed to create topic.", error);
   } finally {
     isLoading.value = false;
   }
 };
 
-const cancelCreatePostForm = () => {
-  newPost.value = { title: '', content: '' };
-  showCreatePostForm.value = false;
+
+const resetCreateForm = () => {
+  newTopic.value = { title: '', description: '' };
+  showCreateForm.value = false;
+};
+
+const cancelCreateForm = () => {
+  resetCreateForm();
+};
+
+const handleError = (defaultMessage, error) => {
+  const errorMessage = error.response?.data?.message || defaultMessage;
+  message.value = { type: 'error', text: errorMessage };
 };
 
 onMounted(() => {
   authStore.checkAuth();
-  fetchTopicDetails();
+  fetchTopics(); 
 });
 </script>
 
@@ -289,48 +255,5 @@ h1 {
 .message.error {
   background-color: #f44336;
   color: white;
-}
-.create-post-form {
-  margin-top: 20px;
-}
-
-.input {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: space-between;
-}
-
-.button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.submit-button {
-  background-color: #4caf50;
-  color: white;
-}
-
-.submit-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.cancel-button {
-  background-color: #f44336;
-  color: white;
-}
-
-.cancel-button:hover {
-  background-color: #d32f2f;
 }
 </style>

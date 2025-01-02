@@ -31,10 +31,21 @@
       </div>
 
       <div v-if="authStore.isAuthenticated" class="post-button-container">
-        <button @click="addPost" class="post-button">Create Post</button>
+        <button @click="toggleCreatePostForm" class="post-button">Create Post</button>
+      </div>
+
+      <div v-if="showCreatePostForm" class="create-post-form">
+        <form @submit.prevent="createPost">
+          <input type="text" v-model="newPost.title" placeholder="Title" required class="input" />
+          <textarea v-model="newPost.content" placeholder="Content" required class="input"></textarea>
+
+          <div class="form-actions">
+            <button type="submit" :disabled="isLoading" class="button submit-button">Create</button>
+            <button type="button" @click="cancelCreatePostForm" class="button cancel-button">Cancel</button>
+          </div>
+        </form>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -49,12 +60,14 @@ const router = useRouter();
 const topic = ref({});
 const isLoading = ref(false);
 const message = ref(null);
-const isAdmin = ref(false); 
+const isAdmin = ref(false);
+const showCreatePostForm = ref(false);
+const newPost = ref({ title: '', content: '' });
 
 const authStore = useAuthStore();
 
 const fetchTopicDetails = async () => {
-  const topicName = decodeURIComponent(route.params.topicName); 
+  const topicName = decodeURIComponent(route.params.topicName);
   if (!topicName) {
     message.value = { type: 'error', text: 'Topic title is missing in the URL.' };
     return;
@@ -69,7 +82,7 @@ const fetchTopicDetails = async () => {
 
     topic.value = response.data;
     isAdmin.value = authStore.isAdmin;
-    
+
     if (topic.value && topic.value.posts) {
       topic.value.posts = response.data.posts;
     } else {
@@ -83,7 +96,6 @@ const fetchTopicDetails = async () => {
   }
 };
 
-
 const deleteTopic = async () => {
   const topicId = topic.value._id;
   try {
@@ -94,7 +106,7 @@ const deleteTopic = async () => {
     });
 
     message.value = { type: 'success', text: 'Topic deleted successfully!' };
-    router.push('/topics'); 
+    router.push('/topics');
   } catch (error) {
     message.value = { type: 'error', text: 'Failed to delete topic.' };
   } finally {
@@ -102,9 +114,47 @@ const deleteTopic = async () => {
   }
 };
 
+const toggleCreatePostForm = () => {
+  showCreatePostForm.value = !showCreatePostForm.value;
+};
+
+const createPost = async () => {
+  if (!newPost.value.title || !newPost.value.content) {
+    message.value = { type: 'error', text: 'Title and content are required.' };
+    return;
+  }
+
+  try {
+    isLoading.value = true;
+    const token = localStorage.getItem('token');
+    const postData = {
+      title: newPost.value.title,
+      content: newPost.value.content,
+      topicId: topic.value._id,
+    };
+
+    await axios.post(`${import.meta.env.VITE_API_URL}/posts`, postData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    message.value = { type: 'success', text: 'Post created successfully!' };
+    fetchTopicDetails(); // Refresh the topic details to show the new post
+    cancelCreatePostForm();
+  } catch (error) {
+    message.value = { type: 'error', text: 'Failed to create post.' };
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const cancelCreatePostForm = () => {
+  newPost.value = { title: '', content: '' };
+  showCreatePostForm.value = false;
+};
+
 onMounted(() => {
-  authStore.checkAuth(); 
-  fetchTopicDetails(); 
+  authStore.checkAuth();
+  fetchTopicDetails();
 });
 </script>
 
@@ -207,6 +257,50 @@ h1 {
   font-size: 0.9em;
   color: #555;
   margin-top: 10px;
+}
+
+.create-post-form {
+  margin-top: 20px;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.submit-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.cancel-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.cancel-button:hover {
+  background-color: #d32f2f;
 }
 
 </style>
