@@ -6,50 +6,67 @@
     <div v-else>
       <div class="profile-info">
         <p><strong>Username:</strong> {{ user.username }}</p>
-        <button v-if="!isEditingUsername" @click="toggleEditUsername" class="edit-button">Edit Username</button>
+        <button @click="toggleEdit('username')" class="edit-button">
+          {{ isEditingUsername ? 'Cancel' : 'Edit Username' }}
+        </button>
+        <div v-if="isEditingUsername" class="profile-edit-form">
+          <div class="input-group">
+            <label for="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              v-model="formData.username"
+              placeholder="Enter new username"
+            />
+          </div>
+          <button @click="updateUsername" class="submit-button">Update Username</button>
+        </div>
 
         <p><strong>Email:</strong> {{ user.email }}</p>
-        <button v-if="!isEditingEmail" @click="toggleEditEmail" class="edit-button">Edit Email</button>
-
-        <button v-if="!isEditingPassword" @click="toggleEditPassword" class="edit-button">Change Password</button>
-
-        <button v-if="!isEditingUsername && !isEditingEmail && !isEditingPassword" @click="confirmDelete" class="delete-button">Delete User</button>
-      </div>
-
-      <!-- Edit Username Form -->
-      <div v-if="isEditingUsername" class="profile-edit-form">
-        <div class="input-group">
-          <label for="username">Username</label>
-          <input type="text" id="username" v-model="formData.username" placeholder="Enter new username" />
-        </div>
-        <button @click="updateUsername" class="submit-button">Update Username</button>
-        <button @click="cancelEdit('username')" class="cancel-button">Cancel</button>
-      </div>
-
-      <!-- Edit Email Form -->
-      <div v-if="isEditingEmail" class="profile-edit-form">
-        <div class="input-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" v-model="formData.email" placeholder="Enter new email" />
-        </div>
-        <button @click="updateEmail" class="submit-button">Update Email</button>
-        <button @click="cancelEdit('email')" class="cancel-button">Cancel</button>
-      </div>
-
-      <!-- Edit Password Form -->
-      <div v-if="isEditingPassword" class="profile-edit-form">
-        <div class="input-group">
-          <label for="password">Current Password</label>
-          <input type="password" id="password" v-model="formData.password" placeholder="Enter current password" />
+        <button @click="toggleEdit('email')" class="edit-button">
+          {{ isEditingEmail ? 'Cancel' : 'Edit Email' }}
+        </button>
+        <div v-if="isEditingEmail" class="profile-edit-form">
+          <div class="input-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              v-model="formData.email"
+              placeholder="Enter new email"
+            />
+          </div>
+          <button @click="updateEmail" class="submit-button">Update Email</button>
         </div>
 
-        <div class="input-group">
-          <label for="newPassword">New Password</label>
-          <input type="password" id="newPassword" v-model="formData.newPassword" placeholder="Enter new password" />
+        <button @click="toggleEdit('password')" class="edit-button">
+          {{ isEditingPassword ? 'Cancel' : 'Change Password' }}
+        </button>
+        <div v-if="isEditingPassword" class="profile-edit-form">
+          <div class="input-group">
+            <label for="password">Current Password</label>
+            <input
+              type="password"
+              id="password"
+              v-model="formData.password"
+              placeholder="Enter current password"
+            />
+          </div>
+          <div class="input-group">
+            <label for="newPassword">New Password</label>
+            <input
+              type="password"
+              id="newPassword"
+              v-model="formData.newPassword"
+              placeholder="Enter new password"
+            />
+          </div>
+          <button @click="updatePassword" class="submit-button">Update Password</button>
         </div>
 
-        <button @click="updatePassword" class="submit-button">Update Password</button>
-        <button @click="cancelEdit('password')" class="cancel-button">Cancel</button>
+        <button v-if="!isEditingUsername && !isEditingEmail && !isEditingPassword" @click="confirmDelete" class="delete-button">
+          Delete User
+        </button>
       </div>
 
       <!-- Delete confirmation modal -->
@@ -75,6 +92,23 @@ import { useRouter } from 'vue-router';
 
 export default {
   name: 'ProfilePage',
+  methods: {
+    toggleEdit(field) {
+      if (field === 'username') {
+        this.isEditingUsername = !this.isEditingUsername;
+        this.isEditingEmail = false;
+        this.isEditingPassword = false;
+      } else if (field === 'email') {
+        this.isEditingEmail = !this.isEditingEmail;
+        this.isEditingUsername = false;
+        this.isEditingPassword = false;
+      } else if (field === 'password') {
+        this.isEditingPassword = !this.isEditingPassword;
+        this.isEditingUsername = false;
+        this.isEditingEmail = false;
+      }
+    },
+  },
   setup() {
     const authStore = useAuthStore();
     const router = useRouter();
@@ -303,9 +337,6 @@ export default {
 };
 </script>
 
-
-
-
 <style scoped>
 .profile-container {
   max-width: 600px;
@@ -352,9 +383,13 @@ h1 {
 }
 
 .profile-edit-form {
-  display: flex;
-  flex-direction: column;
-  margin-top: 20px;
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease-in-out;
+}
+
+.profile-edit-form[style*="display: block;"] {
+  max-height: 200px;
 }
 
 .input-group {
@@ -476,4 +511,5 @@ h1 {
   background-color: #ccc;
   color: white;
 }
+
 </style>
