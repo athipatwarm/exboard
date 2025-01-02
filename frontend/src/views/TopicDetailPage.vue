@@ -136,7 +136,6 @@ const toggleCreatePostForm = () => {
   showCreatePostForm.value = !showCreatePostForm.value;
 };
 
-// Create a new post
 const createPost = async () => {
   if (!newPost.value.title || !newPost.value.content) {
     message.value = { type: 'error', text: 'Title and content are required.' };
@@ -156,6 +155,15 @@ const createPost = async () => {
 
   try {
     isLoading.value = true;
+
+    const newPostItem = {
+      ...postData,
+      _id: 'temp-id',
+      author: authStore.user, 
+      createdAt: new Date().toISOString(),
+    };
+    topic.value.posts.push(newPostItem); 
+
     const token = localStorage.getItem('token');
     const response = await axios.post(`${import.meta.env.VITE_API_URL}/posts`, postData, {
       headers: { Authorization: `Bearer ${token}` },
@@ -163,17 +171,23 @@ const createPost = async () => {
 
     if (response.status === 201) {
       message.value = { type: 'success', text: 'Post created successfully!' };
-      fetchTopicDetails();
-      cancelCreatePostForm();
+
+      await fetchTopicDetails();
+
+      cancelCreatePostForm(); 
+    } else {
+      throw new Error('Failed to create post.');
     }
   } catch (error) {
     console.error(error);
+    topic.value.posts = topic.value.posts.filter(post => post._id !== 'temp-id');
     const errorMessage = error.response?.data?.error || 'Failed to create post.';
     message.value = { type: 'error', text: errorMessage };
   } finally {
     isLoading.value = false;
   }
 };
+
 
 // Cancel post creation form
 const cancelCreatePostForm = () => {
