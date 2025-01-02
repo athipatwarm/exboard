@@ -33,10 +33,7 @@
             <div class="post-date">
               Created at: {{ new Date(post.createdAt).toLocaleString() }}
             </div>
-            <!-- Show delete button if the user is the post author or an admin -->
-            <div v-if="isPostOwnerOrAdmin(post)" class="delete-button-container">
-              <button @click="deletePost(post._id)" class="delete-button">Delete Post</button>
-            </div>
+            
           </div>
         </div>
       </div>
