@@ -172,13 +172,10 @@ export default {
     };
 
     const toggleEdit = (field) => {
-      Object.keys(isEditing.value).forEach(key => {
-        if (key === field) {
-          isEditing.value[key] = !isEditing.value[key];
-        } else {
-          isEditing.value[key] = false;
-        }
-      });
+      isEditing.value[field] = !isEditing.value[field];
+      if (isEditing.value[field]) {
+        formData.value[field] = user.value[field]; // Populate form data when editing starts
+      }
     };
 
     const confirmDelete = () => {
@@ -230,7 +227,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 .profile-container {
