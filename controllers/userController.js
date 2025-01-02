@@ -145,25 +145,45 @@ exports.updateProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
 
-    if (!user) return res.status(404).json({ error: 'User not found.' });
+    if (!user) {
+      console.error('User not found');
+      return res.status(404).json({ error: 'User not found.' });
+    }
 
     if (username) user.username = username;
     if (email) user.email = email;
 
     if (password && newPassword) {
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) return res.status(400).json({ error: 'Current password is incorrect.' });
+      console.log(`Attempting to update password for user ${user.email}`);
+      console.log(`Old Password (provided): ${password}`);
+      console.log(`New Password (provided): ${newPassword}`);
 
-      user.password = await bcrypt.hash(newPassword, 10);
+      // Verify current password
+      const isMatch = await bcrypt.compare(password, user.password);
+      console.log(`Encoded Old Password (DB): ${user.password}`);
+      console.log(`Decoded Old Password Match: ${isMatch}`);
+
+      if (!isMatch) {
+        console.error('Current password is incorrect');
+        return res.status(400).json({ error: 'Current password is incorrect.' });
+      }
+
+      // Hash and save new password
+      const encodedNewPassword = await bcrypt.hash(newPassword, 10);
+      user.password = encodedNewPassword;
+      console.log(`Encoded New Password (DB): ${encodedNewPassword}`);
     }
 
     await user.save();
     res.json({ username: user.username, email: user.email });
+
+    console.log('Profile updated successfully');
   } catch (err) {
-    console.error(err);
+    console.error('Error updating profile:', err);
     res.status(500).json({ error: 'An error occurred while updating the profile.' });
   }
 };
+
 
 // Logout a user from all devices (force logout from all other sessions)
 exports.logoutUser = async (req, res) => {
