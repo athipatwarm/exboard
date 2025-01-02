@@ -17,16 +17,21 @@
       <h2>Posts</h2>
       <div v-if="isLoading" class="loading">Loading posts...</div>
       <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
-      
-      <div v-for="post in topic.posts" :key="post._id" class="post-item">
-        <h3>{{ post.title }}</h3>
-        <p>{{ post.content }}</p>
-        <div class="post-author">
-          Posted by: {{ post.author.username }}
+
+      <div v-if="topic.posts && topic.posts.length > 0">
+        <div v-for="post in topic.posts" :key="post._id" class="post-item">
+          <h3>{{ post.title }}</h3>
+          <p>{{ post.content }}</p>
+          <div class="post-author">
+            Posted by: {{ post.author.username }}
+          </div>
+          <div class="post-date">
+            Created at: {{ new Date(post.createdAt).toLocaleString() }}
+          </div>
         </div>
-        <div class="post-date">
-          Created at: {{ new Date(post.createdAt).toLocaleString() }}
-        </div>
+      </div>
+      <div v-else>
+        <p>No posts found for this topic.</p>
       </div>
 
       <div v-if="authStore.isAuthenticated" class="post-button-container">
@@ -67,7 +72,7 @@ const authStore = useAuthStore();
 
 // Fetch topic details
 const fetchTopicDetails = async () => {
-  const topicName = decodeURIComponent(route.params.topicName);
+  const topicName = decodeURIComponent(route.params.topicName); // Retrieve the topic name from the URL
   if (!topicName) {
     message.value = { type: 'error', text: 'Topic title is missing in the URL.' };
     return;
@@ -81,13 +86,15 @@ const fetchTopicDetails = async () => {
     });
 
     topic.value = response.data; // Store the full topic object
-    isAdmin.value = authStore.isAdmin;
 
-    if (topic.value && topic.value.posts) {
-      topic.value.posts = response.data.posts;
+    // If the response includes posts, link them to the topic and store them
+    if (response.data && response.data.posts) {
+      topic.value.posts = response.data.posts; // Link posts to the topic
     } else {
       message.value = { type: 'error', text: 'No posts found for this topic.' };
     }
+
+    isAdmin.value = authStore.isAdmin; // Check if the user is an admin
   } catch (error) {
     console.error('Error fetching topic details:', error);
     message.value = { type: 'error', text: 'Failed to fetch topic details.' };

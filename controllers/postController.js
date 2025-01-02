@@ -35,6 +35,9 @@ exports.createPost = async (req, res) => {
 
     await post.save();
 
+    topicExists.posts.push(post._id);
+    await topicExists.save(); 
+
     res.status(201).send(post);
   } catch (error) {
     console.error('Error creating post:', error);
