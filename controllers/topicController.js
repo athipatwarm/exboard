@@ -139,3 +139,27 @@ exports.approveTopicRequest = async (req, res) => {
     res.status(500).json({ error: 'Failed to approve topic request.', details: error.message });
   }
 };
+
+exports.getTopicDetails = async (req, res) => {
+  try {
+    const topicName = req.params.topicName;
+    const topic = await Topic.findOne({ title: topicName })
+      .populate({
+        path: 'posts',
+        model: 'Post',
+        populate: {
+          path: 'author',
+          model: 'User',
+        }
+      });
+
+    if (!topic) {
+      return res.status(404).send({ error: 'Topic not found' });
+    }
+
+    res.status(200).send(topic);
+  } catch (error) {
+    console.error('Error fetching topic details:', error);
+    res.status(500).send({ error: 'Failed to fetch topic details' });
+  }
+};

@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div class="topic-detail">
     <div class="topic-info">
       <div class="topic-box">
@@ -87,9 +87,15 @@ const fetchTopicDetails = async () => {
 
     topic.value = response.data; // Store the full topic object
 
-    // If the response includes posts, link them to the topic and store them
-    if (response.data && response.data.posts) {
-      topic.value.posts = response.data.posts; // Link posts to the topic
+    // Fetch posts related to the topic
+    const postsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/posts`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { topic: topic.value._id }
+    });
+
+    // Store posts linked to this topic
+    if (postsResponse.data) {
+      topic.value.posts = postsResponse.data; // Link posts to the topic
     } else {
       message.value = { type: 'error', text: 'No posts found for this topic.' };
     }
