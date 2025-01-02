@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/auth';
 import HomePage from '../views/HomePage.vue';
 import TopicPage from '../views/TopicPage.vue';
-import TopicDetailPage from '../views/TopicDetailPage.vue';  
+import TopicDetailPage from '../views/TopicDetailPage.vue';
 import LoginPage from '../views/LoginPage.vue';
 import RegisterPage from '../views/RegisterPage.vue';
 import ProfilePage from '../views/ProfilePage.vue';
@@ -49,29 +49,28 @@ const router = createRouter({
   routes,
 });
 
-// Global navigation guard for authentication check
-router.beforeEach((to, from, next) => {
-  const auth = useAuthStore(); 
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore();
 
-  console.log('Before Each Route Navigation - Auth Status:', auth.isAuthenticated);
+  if (!authStore.isAuthenticated) {
+    await authStore.checkAuth();
+  }
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!auth.isAuthenticated) {
-      console.log('Not authenticated, redirecting to login');
-      next('/login'); 
-    } else {
-      next(); 
+    if (!authStore.isAuthenticated) {
+      console.log('User not authenticated, redirecting to login page.');
+      return next('/login');
     }
-  } else if (to.matched.some(record => record.meta.requiresUnauth)) {
-    if (auth.isAuthenticated) {
-      console.log('Already authenticated, redirecting to profile');
-      next('/profile'); 
-    } else {
-      next(); 
-    }
-  } else {
-    next();
   }
+
+  if (to.matched.some(record => record.meta.requiresUnauth)) {
+    if (authStore.isAuthenticated) {
+      console.log('User already authenticated, redirecting to profile page.');
+      return next('/profile');
+    }
+  }
+
+  next();
 });
 
 export default router;
