@@ -134,51 +134,51 @@ const toggleCreatePostForm = () => {
   showCreatePostForm.value = !showCreatePostForm.value;
 };
 
-exports.createPost = async (req, res) => {
-  if (!req.user) {
-    console.log("Backend log: User is not logged in.");
-    return res.status(401).send({ error: 'You must be logged in to create a post' });
+const createPost = async () => {
+  if (!newPost.value.title || !newPost.value.content) {
+    message.value = { type: 'error', text: 'Title and content are required.' };
+    return;
   }
 
-  const { title, content, topic } = req.body;
-
-  if (!title || !content || !topic) {
-    console.log("Backend log: Missing required fields");
-    return res.status(400).send({ error: 'Title, content, and topic are required' });
+  if (newPost.value.title.length < 5) {
+    message.value = { type: 'error', text: 'Title must be at least 5 characters long.' };
+    return;
   }
 
-  if (!mongoose.Types.ObjectId.isValid(topic)) {
-    console.log("Backend log: Invalid topic ID", topic);
-    return res.status(400).send({ error: 'Invalid topic ID' });
+  if (!topic.value._id) {
+    message.value = { type: 'error', text: 'Topic ID is invalid.' };
+    return;
   }
+
+  const postData = {
+    title: newPost.value.title,
+    content: newPost.value.content,
+    topic: topic.value._id
+  };
 
   try {
-    const topicExists = await Topic.findById(topic);
-    if (!topicExists) {
-      console.log("Backend log: Topic not found", topic);
-      return res.status(404).send({ error: 'Topic not found' });
-    }
+    isLoading.value = true;
 
-    const post = new Post({
-      title,
-      content,
-      topic,
-      author: req.user._id
+    const token = localStorage.getItem('token');
+    const response = await axios.post(`${import.meta.env.VITE_API_URL}/posts`, postData, {
+      headers: { Authorization: `Bearer ${token}` },
     });
 
-    console.log("Backend log: Saving new post", post);
+    if (response.status === 201) {
+      message.value = { type: 'success', text: 'Post created successfully!' };
 
-    await post.save();
+      await fetchTopicDetails();
 
-    topicExists.posts.push(post._id);
-    await topicExists.save();
-
-    console.log("Backend log: Post created successfully", post);
-
-    res.status(201).send(post);
+      cancelCreatePostForm();
+    } else {
+      throw new Error('Failed to create post.');
+    }
   } catch (error) {
-    console.error("Backend log: Error creating post", error);
-    res.status(500).send({ error: 'Failed to create post' });
+    console.error(error);
+    const errorMessage = error.response?.data?.error || 'Failed to create post.';
+    message.value = { type: 'error', text: errorMessage };
+  } finally {
+    isLoading.value = false;
   }
 };
 
