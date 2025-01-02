@@ -1,23 +1,32 @@
 <template>
   <div class="topic-detail">
-    <div class="topic-box">
-      <h1>{{ topic.title }}</h1>
-      <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>
-      <p>{{ topic.description }}</p>
-      <div class="created-at">Created at: {{ new Date(topic.createdAt).toLocaleString() }}</div>
+    <div class="topic-info">
+      <div class="topic-box">
+        <h1>{{ topic.title }}</h1>
+        <div v-if="topic.category" class="topic-category">Category: {{ topic.category.name }}</div>
+        <p>{{ topic.description }}</p>
+        <div class="created-at">Created at: {{ new Date(topic.createdAt).toLocaleString() }}</div>
 
-      <div v-if="topic.author" class="topic-author">Author: {{ topic.author.username }}</div>
+        <div v-if="topic.author" class="topic-author">Author: {{ topic.author.username }}</div>
 
-      <div v-if="isAdmin" class="delete-button-container">
-        <button @click="deleteTopic" class="delete-button">Delete Topic</button>
+        <div v-if="isAdmin" class="delete-button-container">
+          <button @click="deleteTopic" class="delete-button">Delete Topic</button>
+        </div>
       </div>
     </div>
 
-    <div v-if="isLoading" class="loading">Loading...</div>
-    <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
+    <div class="posts-section">
+      <h2>Posts</h2>
+      <div v-if="isLoading" class="loading">Loading posts...</div>
+      <div v-if="message" :class="['message', message.type]">{{ message.text }}</div>
+      <div v-for="post in topic.posts" :key="post._id" class="post-item">
+        <h3>{{ post.title }}</h3>
+        <p>{{ post.content }}</p>
+        <div class="post-author">Posted by: {{ post.author.username }}</div>
+      </div>
+    </div>
   </div>
 </template>
-
 
 <script setup>
 import { ref, onMounted } from 'vue';
@@ -74,6 +83,36 @@ const deleteTopic = async () => {
   }
 };
 
+const fetchTopicDetails = async () => {
+  const topicName = decodeURIComponent(route.params.topicName);
+  if (!topicName) {
+    message.value = { type: 'error', text: 'Topic title is missing in the URL.' };
+    return;
+  }
+
+  try {
+    isLoading.value = true;
+    const token = localStorage.getItem('token');
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/topics/${topicName}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    topic.value = response.data;
+
+    const postsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/posts?topicId=${topic.value._id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    topic.value.posts = postsResponse.data; 
+
+    isAdmin.value = useAuthStore().isAdmin;
+  } catch (error) {
+    console.error('Error fetching topic details:', error);
+    message.value = { type: 'error', text: 'Failed to fetch topic details.' };
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 onMounted(() => {
   fetchTopicDetails(); 
 });
@@ -81,9 +120,18 @@ onMounted(() => {
 
 <style scoped>
 .topic-detail {
-  max-width: 800px;
-  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
   padding: 20px;
+}
+
+.topic-info {
+  width: 25%;
+  padding-right: 20px;
+}
+
+.posts-section {
+  width: 70%;
 }
 
 .topic-box {
@@ -153,4 +201,22 @@ h1 {
   background-color: #f44336;
   color: white;
 }
+
+.post-item {
+  margin-top: 20px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 15px;
+}
+
+.post-item h3 {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+}
+
+.post-author {
+  font-size: 0.9em;
+  color: #555;
+  margin-top: 10px;
+}
+
 </style>
