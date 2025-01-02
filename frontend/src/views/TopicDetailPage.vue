@@ -193,34 +193,6 @@ const createPost = async () => {
   }
 };
 
-const deletePost = async (postId) => {
-  try {
-    isLoading.value = true;
-    const token = localStorage.getItem('token');
-    await axios.delete(`${import.meta.env.VITE_API_URL}/posts/${postId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    message.value = { type: 'success', text: 'Post deleted successfully!' };
-    await fetchTopicDetails(); // Refresh topic and posts after deletion
-  } catch (error) {
-    message.value = { type: 'error', text: 'Failed to delete post.' };
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-// Check if the current user is the post owner or an admin
-const isPostOwnerOrAdmin = (post) => {
-  return post.author._id === authStore.user._id || authStore.isAdmin;
-};
-
-onMounted(() => {
-  authStore.checkAuth();
-  isAdmin.value = authStore.isAdmin;
-  fetchTopicDetails();
-});
-
 // Cancel post creation form
 const cancelCreatePostForm = () => {
   newPost.value = { title: '', content: '' };
@@ -431,24 +403,5 @@ h2 {
 
 .post-button:hover {
   background-color: #0056b3;
-}
-
-.delete-button-container {
-  text-align: right;
-  margin-top: 15px;
-}
-
-.delete-button {
-  padding: 8px 15px;
-  background-color: #ff6b6b;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 0.9em;
-}
-
-.delete-button:hover {
-  background-color: #ff4040;
 }
 </style>
