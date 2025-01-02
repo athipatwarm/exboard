@@ -23,7 +23,8 @@
           <h3>{{ post.title }}</h3>
           <p>{{ post.content }}</p>
           <div class="post-author">
-            Posted by: {{ post.author.username }}
+            <!-- Check if author is defined before accessing the username -->
+            Posted by: {{ post.author ? post.author.username : 'Unknown Author' }}
           </div>
           <div class="post-date">
             Created at: {{ new Date(post.createdAt).toLocaleString() }}
@@ -91,9 +92,9 @@ const fetchTopicDetails = async () => {
       throw new Error('No data found for this topic.');
     }
 
-    const postsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/posts`, {
-      headers: { Authorization: `Bearer ${token}` },
-      params: { topic: topic.value._id }
+    // Update posts fetch URL to use the correct endpoint
+    const postsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/posts/${topic.value._id}`, {
+      headers: { Authorization: `Bearer ${token}` }
     });
 
     if (postsResponse && postsResponse.data) {
